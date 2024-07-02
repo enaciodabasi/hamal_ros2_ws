@@ -1,0 +1,12 @@
+
+float64 target_position
+float64 profile_time
+
+---
+
+bool target_reached
+string status_str
+---
+
+float64 current_position
+float64 target_command

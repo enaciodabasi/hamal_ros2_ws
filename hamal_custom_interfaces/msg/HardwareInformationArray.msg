@@ -1,0 +1,1 @@
+hamal_custom_interfaces/HardwareInformation[] hardware_info_array

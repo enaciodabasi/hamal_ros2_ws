@@ -1,0 +1,9 @@
+#goal
+hamal_custom_interfaces/HomingInformation homing_information
+---
+#result
+string status
+bool homing_done
+---
+#feedback
+string homing_status

@@ -1,0 +1,6 @@
+builtin_interfaces/Time timestamp
+
+int8 homing_method
+int32 switch_search_speed
+int32 zero_search_speed
+int32 homing_accel

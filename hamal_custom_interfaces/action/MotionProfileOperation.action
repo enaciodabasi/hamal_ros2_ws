@@ -1,0 +1,8 @@
+hamal_custom_interfaces/MotionProfileCommand profile_information
+---
+
+bool target_reached
+float64 following_error
+---
+
+float32 profile_percentage
