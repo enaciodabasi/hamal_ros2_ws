@@ -111,20 +111,20 @@ hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcp
     m_EthercatController->setData<int32_t>("somanet_node_1", "target_velocity", 0);
     return;
   }
-  const auto rightWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams.m_RightWheelJointName).targetVelocity;
-  const auto leftWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams.m_LeftWheelJointName).targetVelocity;
+  const auto rightWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams->m_RightWheelJointName).targetVelocity;
+  const auto leftWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).targetVelocity;
 
   double lifterTarget = 0.0;
   double tempLifterTarget = 0.0;
   std::string targetsPdoName;
-  /* const ControlType lifterControlType = m_JointsMap.at(m_HardwareInterfaceParams.m_LifterJointName).controlType;
+  /* const ControlType lifterControlType = m_JointsMap.at(m_HardwareInterfaceParams->m_LifterJointName).controlType;
   if(lifterControlType == ControlType::Position){
-      double targetCmd = m_JointsMap.at(m_HardwareInterfaceParams.m_LifterJointName).targetPosition;
+      double targetCmd = m_JointsMap.at(m_HardwareInterfaceParams->m_LifterJointName).targetPosition;
       lifterTarget = targetCmd;
       targetsPdoName = "target_position";
   }
   else if(lifterControlType == ControlType::Velocity){
-      double targetCmd = m_JointsMap.at(m_HardwareInterfaceParams.m_LifterJointName).targetVelocity;
+      double targetCmd = m_JointsMap.at(m_HardwareInterfaceParams->m_LifterJointName).targetVelocity;
       targetCmd = targetCmd * (60.0 / (2.0 * M_PI));
       lifterTarget = 0.0;
       tempLifterTarget = targetCmd;
@@ -142,59 +142,64 @@ hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcp
       m_JointsMap.at(m_LifterJointName).hardwareInfo.target_vel = tempLifterTarget;
     } */
 
-  if(m_LifterHomingHelper->isHomingActive){
-                if(m_HomingServer->isPreemptRequested()){
-                    m_HomingServer->setPreempted();
-                }
+  if (m_LifterHomingHelper->isHomingActive)
+  {
+    /* if (m_HomingServer->isPreemptRequested())
+    {
+      m_HomingServer->setPreempted();
+    } */
 
-                const auto homingStatus = m_LifterHomingHelper->getCurrentHomingStatus();
-                const auto homingStatusStr = HomingStatusStrings.find(homingStatus);
-                switch (homingStatus)
-                {
-                case HomingStatus::HomingIsPerformed :
-                case HomingStatus::HomingIsInterruptedOrNotStarted :
-                case HomingStatus::HomingConfirmedTargetNotReached :
-                {
-                    
-                    if(inRange<double>(m_JointsMap.at(m_LifterJointName).position, 0.0, 0.5)){
-                        hamal_custom_interfaces::HomingOperationResult homingRes;
-                        homingRes.status = homingStatusStr->second;
-                        homingRes.homingDone = true;
-                        m_HomingServer->setSucceeded(homingRes);
-                        m_LifterHomingHelper->reset();
-                    }
-                    else{
-                        hamal_custom_interfaces::HomingOperationFeedback homingFb;
-                        homingFb.homingStatus = homingStatusStr->second;
+    const auto homingStatus = m_LifterHomingHelper->getCurrentHomingStatus();
+    const auto homingStatusStr = HomingStatusStrings.find(homingStatus);
+    switch (homingStatus)
+    {
+    case HomingStatus::HomingIsPerformed:
+    case HomingStatus::HomingIsInterruptedOrNotStarted:
+    case HomingStatus::HomingConfirmedTargetNotReached:
+    {
 
-                        m_HomingServer->publishFeedback(homingFb);
-                    }
-                    break;
-                }
-                case HomingStatus::HomingCompleted :
-                {
-                    hamal_custom_interfaces::HomingOperationResult homingRes;
-                    homingRes.status = homingStatusStr->second;
-                    homingRes.homingDone = true;
-                    m_HomingServer->setSucceeded(homingRes);
-                    m_LifterHomingHelper->reset();
-                    break;
-                }
-                case HomingStatus::ErrorDetectedMotorStillRunning :
-                case HomingStatus::ErrorDuringHomingMotorAtStandstill :
-                {
-                    hamal_custom_interfaces::HomingOperationResult homingRes;
-                    homingRes.status = homingStatusStr->second;
-                    homingRes.homingDone = false;
-                    m_HomingServer->setAborted(homingRes);
-                    m_LifterHomingHelper->reset();
-                    break;
-                }
-                default:
-                    break;
-                }
+      if (inRange<double>(m_JointsMap.at(m_HardwareInterfaceParams->m_LifterJointName).currentPosition, 0.0, 0.5))
+      {
+        /* hamal_custom_interfaces::action::HomingOperation_Result homingRes; */
+        /* homingRes.status = homingStatusStr->second;
+        homingRes.homing_done = true; */
+        /* m_HomingServer->setSucceeded(homingRes); */
+        m_LifterHomingHelper->reset();
+      }
+      else
+      {
+        /* hamal_custom_interfaces::action::HomingOperation_Feedback homingFb; */
+        /* homingFb.homing_status = homingStatusStr->second; */
 
-            }
+        /* m_HomingServer->publishFeedback(homingFb); */
+      }
+      break;
+    }
+    case HomingStatus::HomingCompleted:
+    {
+      /* hamal_custom_interfaces::action::HomingOperation_Result homingRes; */
+      /* homingRes.status = homingStatusStr->second;
+      homingRes.homing_done = true; */
+      /* m_HomingServer->setSucceeded(homingRes); */
+      m_LifterHomingHelper->reset();
+      break;
+    }
+    case HomingStatus::ErrorDetectedMotorStillRunning:
+    case HomingStatus::ErrorDuringHomingMotorAtStandstill:
+    {
+      /* hamal_custom_interfaces::action::HomingOperation_Result homingRes; */
+      /* homingRes.status = homingStatusStr->second;
+      homingRes.homing_done = false; */
+      /* m_HomingServer->setAborted(homingRes); */
+      m_LifterHomingHelper->reset();
+      break;
+    }
+    default:
+      break;
+    }
+  }
+
+  return hardware_interface::return_type::OK;
 }
 
 hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp::Time &time, const rclcpp::Duration &period)
@@ -203,34 +208,43 @@ hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp
   const auto leftWheelPosition = m_EthercatController->getData<int32_t>("somanet_node_2", "actual_position");
   const auto lifterPosition = m_EthercatController->getData<int32_t>("somanet_node_0", "actual_position");
   if (leftWheelPosition && rightWheelPosition && lifterPosition)
-  {
+  { 
+    
 
-    m_JointsMap.at(m_HardwareInterfaceParams.m_LeftWheelJointName).currentPosition = (motorPositionToJointPosition(leftWheelPosition.value())) * -1.0;;
-    m_JointsMap.at(m_HardwareInterfaceParams.m_RightWheelJointName).currentPosition = (motorPositionToJointPosition(rightWheelPosition.value())) /* * 0.5 */;
+    m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).currentPosition = (motorPositionToJointPosition(leftWheelPosition.value())) * -1.0;
+
+    m_JointsMap.at(m_HardwareInterfaceParams->m_RightWheelJointName).currentPosition = (motorPositionToJointPosition(rightWheelPosition.value())) /* * 0.5 */;
     double lifterPos = static_cast<double>(lifterPosition.value());
-    double lifterPosInRads = (lifterPos / m_HardwareInterfaceParams.m_LifterIncrement) * (2.0 * M_PI);
-    m_JointsMap.at(m_HardwareInterfaceParams.m_LifterJointName).currentPosition = lifterPosInRads;
+    double lifterPosInRads = (lifterPos / m_HardwareInterfaceParams->m_LifterIncrement) * (2.0 * M_PI);
+    m_JointsMap.at(m_HardwareInterfaceParams->m_LifterJointName).currentPosition = lifterPosInRads;
 
-    /* m_JointsMap.at(m_HardwareInterfaceParams.m_LeftWheelJointName).hardwareInfo.current_pos = motorPositionToJointPosition(leftWheelPosition.value());
-    m_JointsMap.at(m_HardwareInterfaceParams.m_RightWheelJointName).hardwareInfo.current_pos = motorPositionToJointPosition(rightWheelPosition.value());
-    m_JointsMap.at(m_HardwareInterfaceParams.m_LifterJointName).hardwareInfo.current_pos = lifterPosInRads; */
+    /* m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).hardwareInfo.current_pos = motorPositionToJointPosition(leftWheelPosition.value());
+    m_JointsMap.at(m_HardwareInterfaceParams->m_RightWheelJointName).hardwareInfo.current_pos = motorPositionToJointPosition(rightWheelPosition.value());
+    m_JointsMap.at(m_HardwareInterfaceParams->m_LifterJointName).hardwareInfo.current_pos = lifterPosInRads; */
 /*             ROS_INFO("Position: %f", leftWheelPosition.value());
- */        }
+ */        
+  }
+  
+  const auto rightWheelVelocity = m_EthercatController->getData<int32_t>("somanet_node_1", "actual_velocity");
+  const auto leftWheelVelocity = m_EthercatController->getData<int32_t>("somanet_node_2", "actual_velocity");
+  const auto lifterVelocity = m_EthercatController->getData<int32_t>("somanet_node_0", "actual_velocity");
 
-const auto rightWheelVelocity = m_EthercatController->getData<int32_t>("somanet_node_1", "actual_velocity");
-const auto leftWheelVelocity = m_EthercatController->getData<int32_t>("somanet_node_2", "actual_velocity");
-const auto lifterVelocity = m_EthercatController->getData<int32_t>("somanet_node_0", "actual_velocity");
+  if (leftWheelVelocity && rightWheelVelocity)
+  {
+    m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).currentVelocity = motorVelocityToJointVelocity(leftWheelVelocity.value());
+    m_JointsMap.at(m_HardwareInterfaceParams->m_RightWheelJointName).currentVelocity = motorVelocityToJointVelocity(rightWheelVelocity.value());
+    double lifterVel = static_cast<double>(lifterVelocity.value());
+    lifterVel = (lifterVel * 2.0 * M_PI) / 60.0;
+    m_JointsMap.at(m_HardwareInterfaceParams->m_LifterJointName).currentVelocity = lifterVel;
 
-if (leftWheelVelocity && rightWheelVelocity)
-{
-  m_JointsMap.at(m_HardwareInterfaceParams.m_LeftWheelJointName).currentVelocity = motorVelocityToJointVelocity(leftWheelVelocity.value());
-  m_JointsMap.at(m_HardwareInterfaceParams.m_RightWheelJointName).currentVelocity = motorVelocityToJointVelocity(rightWheelVelocity.value());
-  double lifterVel = static_cast<double>(lifterVelocity.value());
-  lifterVel = (lifterVel * 2.0 * M_PI) / 60.0;
-  m_JointsMap.at(m_HardwareInterfaceParams.m_LifterJointName).currentVelocity = lifterVel;
-
-  /* m_JointsMap.at(m_RightWheelJointName).hardwareInfo.current_vel = rightWheelVelocity.value();
-  m_JointsMap.at(m_LeftWheelJointName).hardwareInfo.current_vel = leftWheelVelocity.value();
-  m_JointsMap.at(m_LifterJointName).hardwareInfo.current_vel = lifterVel; */
+    /* m_JointsMap.at(m_RightWheelJointName).hardwareInfo.current_vel = rightWheelVelocity.value();
+    m_JointsMap.at(m_LeftWheelJointName).hardwareInfo.current_vel = leftWheelVelocity.value();
+    m_JointsMap.at(m_LifterJointName).hardwareInfo.curren
+    t_vel = lifterVel; */
+  }
+  
+  return hardware_interface::return_type::OK;
 }
-}
+
+PLUGINLIB_EXPORT_CLASS(
+  hamal_hardware::HamalHardware, hardware_interface::SystemInterface)

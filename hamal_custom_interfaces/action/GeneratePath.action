@@ -1,0 +1,13 @@
+### goal
+hamal_custom_interfaces/PathInfo path_info
+
+---
+
+### result
+
+nav_msgs/Path generated_path
+
+---
+
+### feedback
+std_msgs/Empty feedback

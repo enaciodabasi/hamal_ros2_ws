@@ -6,37 +6,65 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-set(
-  THIS_PACKAGE_INCLUDE_DEPENDS
+set(THIS_PACKAGE_INCLUDE_DEPENDS
   hardware_interface
   rclcpp
   rclcpp_lifecycle
+  rclcpp_components
   pluginlib
+  realtime_tools
+  hamal_custom_interfaces
+  std_msgs
 )
 
-# find dependencies
+set(ethercat_interface_lib /usr/local/lib/libethercat_interface.so)
+#set(ethercat_interface_lib_INCLUDE_DIRS /home/rnd/ethercat_interface/include/)
+set(ethercat_interface_lib_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/external_libs/ethercat_interface/include/)
+set(etherlab /usr/local/lib/libethercat.so)
+
 find_package(ament_cmake REQUIRED)
 foreach(depends IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${depends} REQUIRED)
 endforeach()
 
+add_library(
+  ${PROJECT_NAME}
+  SHARED
+  src/hamal_hardware.cpp
+  src/ethercat_handler.cpp
+  src/homing_helper.cpp
+  src/hardware_interface_node.cpp
+)
+target_include_directories(
+  ${PROJECT_NAME}
+  PUBLIC
+  include
+  ${ethercat_interface_lib_INCLUDE_DIRS}
+)
+target_link_libraries(${PROJECT_NAME} 
+  ${ethercat_interface_lib}
+  ${etherlab}
+)
 
+ament_target_dependencies(
+  ${PROJECT_NAME}
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
+)
 
+pluginlib_export_plugin_description_file(hardware_interface hamal_hardware.xml)
+install(
+  TARGETS ${PROJECT_NAME}
+  DESTINATION lib
+)
 
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
+ament_export_include_directories(
+  include
+)
+ament_export_libraries(
+  ${PROJECT_NAME}
+)
+ament_export_dependencies(
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
+)
 
 ament_package()

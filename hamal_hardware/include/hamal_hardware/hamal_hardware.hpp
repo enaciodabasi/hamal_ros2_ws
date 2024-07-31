@@ -18,15 +18,27 @@
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
 #include <hardware_interface/types/hardware_interface_type_values.hpp>
 #include <pluginlib/class_list_macros.hpp>
-
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 #include <rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp>
 #include <rclcpp_lifecycle/state.hpp>
 
+#include <hamal_custom_interfaces/msg/hardware_information.hpp>
+#include <hamal_custom_interfaces/msg/hardware_information_array.hpp>
+#include <hamal_custom_interfaces/srv/emergency_stop.hpp>
+#include <hamal_custom_interfaces/action/lifter_operation.hpp>
+
+#include "hamal_hardware/hardware_interface_node.hpp"
 #include "hamal_hardware/homing_helper.hpp"
 #include "hamal_hardware/ethercat_handler.hpp"
 #include "hamal_hardware/visibility_control.h"
+
+template<typename T>
+bool inRange(const T& check_val, const T& target_val, const T& range)
+{
+
+return (check_val < (target_val + range)) && (check_val > (target_val - range));
+}
 
 namespace hamal_hardware
 {
@@ -47,24 +59,7 @@ namespace hamal_hardware
     }
   };
 
-  struct HamalHardwareParams
-  {
-    double m_LoopFrequency = 500.0;
-
-    bool m_RosLoopFlag = true;
-
-    double m_Reduction = 0.0;
-
-    double m_LifterMotorReduction = 0.0;
-
-    double m_Increment = 0.0;
-
-    double m_LifterIncrement = 0.0;
-
-    std::string m_LeftWheelJointName;
-    std::string m_RightWheelJointName;
-    std::string m_LifterJointName;
-  };
+  
 
   class HamalHardware : public hardware_interface::SystemInterface
   {
@@ -98,13 +93,14 @@ namespace hamal_hardware
         const rclcpp::Time &time, const rclcpp::Duration &period) override;
 
   private:
+
     std::unordered_map<std::string, Joint> m_JointsMap;
 
     std::unique_ptr<EthercatHandler> m_EthercatController;
 
     std::shared_ptr<HomingHelper> m_LifterHomingHelper;
 
-    HamalHardwareParams m_HardwareInterfaceParams;
+    std::shared_ptr<HamalHardwareParams> m_HardwareInterfaceParams;
 
     std::string m_EthercatConfigFilePath;
 
@@ -116,7 +112,7 @@ namespace hamal_hardware
      */
     inline const double motorPositionToJointPosition(const int32_t &motor_position)
     {
-      return (double)(motor_position / m_HardwareInterfaceParams.m_Increment) * (2.0 * M_PI) / m_HardwareInterfaceParams.m_Reduction;
+      return (double)(motor_position / m_HardwareInterfaceParams->m_Increment) * (2.0 * M_PI) / m_HardwareInterfaceParams->m_Reduction;
     }
 
     /**
@@ -127,7 +123,7 @@ namespace hamal_hardware
      */
     inline const int32_t jointPositionToMotorPosition(const double &joint_position)
     {
-      return (int32_t)((joint_position * m_HardwareInterfaceParams.m_Increment * m_HardwareInterfaceParams.m_Reduction) / (2.0 * M_PI));
+      return (int32_t)((joint_position * m_HardwareInterfaceParams->m_Increment * m_HardwareInterfaceParams->m_Reduction) / (2.0 * M_PI));
     }
 
     /**
@@ -138,7 +134,7 @@ namespace hamal_hardware
      */
     inline const double motorVelocityToJointVelocity(const int32_t &motor_velocity)
     {
-      const double currentVel = ((double)motor_velocity * 2.0 * M_PI) / (60.0 * m_HardwareInterfaceParams.m_Reduction);
+      const double currentVel = ((double)motor_velocity * 2.0 * M_PI) / (60.0 * m_HardwareInterfaceParams->m_Reduction);
       return currentVel;
     }
 
@@ -150,8 +146,8 @@ namespace hamal_hardware
      */
     inline const int32_t jointVelocityToMotorVelocity(const double &joint_velocity)
     {
-      int32_t targetVel = ((60 * joint_velocity) / 2 * M_PI) * m_HardwareInterfaceParams.m_Reduction;
-      targetVel = (joint_velocity * 60.0 * m_HardwareInterfaceParams.m_Reduction) / (2.0 * M_PI);
+      int32_t targetVel = ((60 * joint_velocity) / 2 * M_PI) * m_HardwareInterfaceParams->m_Reduction;
+      targetVel = (joint_velocity * 60.0 * m_HardwareInterfaceParams->m_Reduction) / (2.0 * M_PI);
       return targetVel;
     }
   };
