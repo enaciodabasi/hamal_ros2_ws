@@ -16,8 +16,21 @@
 #include <rclcpp_action/rclcpp_action.hpp>
 
 #include "hamal_utils/point_interpolation_ros.hpp"
+#include "hamal_utils/geometry_utils_ros.hpp"
 
 #include "hamal_custom_interfaces/action/generate_path.hpp"
+#include <std_msgs/msg/float64_multi_array.hpp>
+ 
+#include <queue>
+#include <string>
+#include <mutex>
+#include <thread>
+#include <memory>
+
+enum class CurveType : uint16_t
+{
+  ClosedCurve
+};
 
 class PathGenerationServer : rclcpp::Node
 {
@@ -27,15 +40,19 @@ class PathGenerationServer : rclcpp::Node
 
   ~PathGenerationServer();
 
-
-
   private:
+
+  std::mutex m_ExecMutex;
+
+  std::string m_ActiveGoalID;
 
   std::shared_ptr<rclcpp_action::Server<hamal_custom_interfaces::action::GeneratePath>> m_PathGenerationServer;
 
+  bool m_AnyGoalActive = false;
+
   rclcpp_action::GoalResponse handleGoalRequest(
     const rclcpp_action::GoalUUID& goal_uuid,
-    std::shared_ptr<const hamal_custom_interfaces::action::GeneratePath> goal
+    std::shared_ptr<const hamal_custom_interfaces::action::GeneratePath::Goal> goal
   );
 
   rclcpp_action::CancelResponse handleCancelRequest(
@@ -43,6 +60,10 @@ class PathGenerationServer : rclcpp::Node
   );
 
   void handleGoalAcception(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<hamal_custom_interfaces::action::GeneratePath>> goal_handle
+  );
+
+  void execute_goal(
     const std::shared_ptr<rclcpp_action::ServerGoalHandle<hamal_custom_interfaces::action::GeneratePath>> goal_handle
   );
 

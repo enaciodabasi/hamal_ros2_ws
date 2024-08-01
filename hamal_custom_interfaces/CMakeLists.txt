@@ -24,6 +24,7 @@ set(
   "msg/MotionReference.msg"
   "msg/SpeedLimitRatio.msg"
   "msg/PathInfo.msg"
+  "msg/PathPoint2D.msg"
 )
 
 set(
