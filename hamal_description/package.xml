@@ -4,7 +4,7 @@
   <name>hamal_description</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="=">naci</maintainer>
+  <maintainer email="enaciodabasi@outlook.com">Eren Naci Odabasi</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

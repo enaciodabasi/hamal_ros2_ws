@@ -34,7 +34,7 @@ private:
 
   rclcpp_action::CancelResponse homingServerHandleCancelCallback(
       const std::shared_ptr<rclcpp_action::ServerGoalHandle<hamal_custom_interfaces::action::HomingOperation>> goal_handle);
-
+  
   void homingServerAcceptGoalCallback(const std::shared_ptr<rclcpp_action::ServerGoalHandle<hamal_custom_interfaces::action::HomingOperation>> goal_handle);
 };
 

@@ -1,5 +1,5 @@
 #ifndef HAMAL_HARDWARE_DEFS_HPP_
-#define HAMAL_HARDWARE_DEFS_HPP
+#define HAMAL_HARDWARE_DEFS_HPP_
 
 
 #include <unordered_map>

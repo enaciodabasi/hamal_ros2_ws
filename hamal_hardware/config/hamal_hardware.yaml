@@ -1,0 +1,19 @@
+hamal_hardware:
+ ros__parameters:
+  
+  ## Hz
+  loop_frequency: 500.0
+
+  left_wheel_joint_name: "left_wheel_joint"
+  
+  right_wheel_joint_name: "right_wheel_joint"
+  
+  lifter_joint_name: "lifter_joint"
+  
+  wheel_increment: 16384
+
+  lifter_increment: 0
+
+  wheel_reduction: 24.685
+
+  lifter_reduction: 1.0

@@ -1,5 +1,5 @@
 /**
- * @file hardware_interface_node.cpp
+ * @file hamal_hardware_node.cpp
  * @author your name (you@domain.com)
  * @brief 
  * @version 0.1
@@ -12,7 +12,7 @@
 #include "hamal_hardware/hardware_interface_node.hpp"
 
 HardwareInterfaceNode::HardwareInterfaceNode()
-  : rclcpp::Node("hardware_interface_node")
+  : rclcpp::Node("hamal_hardware_node")
 {
 
 }
@@ -31,23 +31,23 @@ bool HardwareInterfaceNode::init()
 
 void HardwareInterfaceNode::configure_params()
 {
-  declare_parameter("/hardware_interface/loop_frequency", 500.0);
-  declare_parameter("/hardware_interface/wheel_reduction", 0.0);
-  declare_parameter("/hardware_interface/lifter_reduction", 0.0);
-  declare_parameter("/hardware_interface/wheel_increment", 0);
-  declare_parameter("/hardware_interface/lifter_increment", 0);
-  declare_parameter("/hardware_interface/left_wheel_joint_name", "left_wheel_joint");
-  declare_parameter("/hardware_interface/right_wheel_joint_name", "right_wheel_joint");
-  declare_parameter("/hardware_interface/lifter_joint_name", "lifter_joint");
+  declare_parameter("/hamal_hardware/loop_frequency", 500.0);
+  declare_parameter("/hamal_hardware/wheel_reduction", 0.0);
+  declare_parameter("/hamal_hardware/lifter_reduction", 0.0);
+  declare_parameter("/hamal_hardware/wheel_increment", 0);
+  declare_parameter("/hamal_hardware/lifter_increment", 0);
+  declare_parameter("/hamal_hardware/left_wheel_joint_name", "left_wheel_joint");
+  declare_parameter("/hamal_hardware/right_wheel_joint_name", "right_wheel_joint");
+  declare_parameter("/hamal_hardware/lifter_joint_name", "lifter_joint");
 
-  m_Params->m_LoopFrequency = get_parameter("/hardware_interface/loop_frequency").as_double();
-  m_Params->m_Reduction = get_parameter("/hardware_interface/wheel_reduction").as_double();
-  m_Params->m_LifterMotorReduction = get_parameter("/hardware_interface/lifter_reduction").as_double();
-  m_Params->m_Increment = get_parameter("/hardware_interface/wheel_increment").as_int();
-  m_Params->m_LifterIncrement = get_parameter("/hardware_interface/lifter_increment").as_int();
-  m_Params->m_LeftWheelJointName = get_parameter("/hardware_interface/left_wheel_joint_name").as_string();
-  m_Params->m_RightWheelJointName = get_parameter("/hardware_interface/right_wheel_joint_name").as_string();
-  m_Params->m_LifterJointName = get_parameter("/hardware_interface/lifter_joint").as_string();
+  m_Params->m_LoopFrequency = get_parameter("/hamal_hardware/loop_frequency").as_double();
+  m_Params->m_Reduction = get_parameter("/hamal_hardware/wheel_reduction").as_double();
+  m_Params->m_LifterMotorReduction = get_parameter("/hamal_hardware/lifter_reduction").as_double();
+  m_Params->m_Increment = get_parameter("/hamal_hardware/wheel_increment").as_int();
+  m_Params->m_LifterIncrement = get_parameter("/hamal_hardware/lifter_increment").as_int();
+  m_Params->m_LeftWheelJointName = get_parameter("/hamal_hardware/left_wheel_joint_name").as_string();
+  m_Params->m_RightWheelJointName = get_parameter("/hamal_hardware/right_wheel_joint_name").as_string();
+  m_Params->m_LifterJointName = get_parameter("/hamal_hardware/lifter_joint").as_string();
   
 }
 

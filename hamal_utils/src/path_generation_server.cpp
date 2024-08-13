@@ -1,4 +1,4 @@
-#include "path_generation_server.hpp"
+#include "hamal_utils/path_generation_server.hpp"
 
 PathGenerationServer::PathGenerationServer()
   : Node("path_generation_server_node")
@@ -29,7 +29,7 @@ rclcpp_action::GoalResponse PathGenerationServer::handleGoalRequest(
   {
     return rclcpp_action::GoalResponse::ACCEPT_AND_DEFER;
   }
-  
+    
 
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
