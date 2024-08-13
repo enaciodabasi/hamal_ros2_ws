@@ -1,0 +1,7 @@
+<library path="hamal_diff_drive_controller">
+  <class name="hamal_diff_drive_controller/HamalDiffDriveController" type="hamal_diff_drive_controller::HamalDiffDriveController" base_class_type="controller_interface::ControllerInterface">
+  <description>
+    The differential drive controller transforms linear and angular velocity messages into signals for each wheel(s) for a differential drive robot.
+  </description>
+  </class>
+</library>
