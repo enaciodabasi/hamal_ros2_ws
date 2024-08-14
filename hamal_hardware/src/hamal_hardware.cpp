@@ -109,7 +109,7 @@ hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcp
   {
     m_EthercatController->setData<int32_t>("somanet_node_2", "target_velocity", 0);
     m_EthercatController->setData<int32_t>("somanet_node_1", "target_velocity", 0);
-    return;
+    return hardware_interface::return_type::ERROR;
   }
   const auto rightWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams->m_RightWheelJointName).targetVelocity;
   const auto leftWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).targetVelocity;
