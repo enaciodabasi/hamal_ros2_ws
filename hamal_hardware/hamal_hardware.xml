@@ -1,7 +1,7 @@
 <library path="hamal_hardware">
   
-  <class name="hamal_hardware/HamalSystemHardware"
-         type="hamal_hardware::HamalSystemHardware"
+  <class name="hamal_hardware/HamalHardware"
+         type="hamal_hardware::HamalHardware"
          base_class_type="hardware_interface::SystemInterface">
     <description>
       Hamal ROS 2 hardware interface.

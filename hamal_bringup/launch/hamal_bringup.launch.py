@@ -41,7 +41,7 @@ def generate_launch_description():
         ])
         ]
     )
-    robot_description = {"robot_description": robot_description_content}
+    robot_description = {'robot_description': robot_description_content}
     ### Launch robot_state_publisher
     ## Run Condition: Always
 
@@ -54,49 +54,51 @@ def generate_launch_description():
 
     ### Launch controllers and hardware
     ## Run Condition: Always
+    control_launch_path = os.path.join(get_package_share_directory("hamal_control"), "launch", "hamal_control.launch.py")
+    
     control_launch = IncludeLaunchDescription(
         launch_description_source=PythonLaunchDescriptionSource(
-            launch_file_path=[get_package_share_directory("hamal_control"), "launch", "hamal_control.launch.py"]
+            launch_file_path=[control_launch_path]
         ),
-        launch_arguments=[('robot_description', robot_description)]
+        #launch_arguments={'robot_description', robot_description}
     )
-    
-    laser_scanner_launch = IncludeLaunchDescription(
-      launch_description_source=PythonLaunchDescriptionSource(
-        launch_file_path=[get_package_share_directory("hamal_mapping"), "launch", "hamal_laser_scanners.launch.py"]
-      )
-    )
+    #scanner_launch_path = os.path.join(get_package_share_directory("hamal_mapping"), "launch", "hamal_laser_scanners.launch.py")
+    #laser_scanner_launch = IncludeLaunchDescription(
+    #  launch_description_source=PythonLaunchDescriptionSource(
+    #    launch_file_path=[scanner_launch_path]
+    #  )
+    #)
 
     ### Get requested robot mode:
-    robot_mode_str: str = LaunchConfiguration("operation_mode").perform()
-    robot_mode_str = robot_mode_str.upper()
-    robot_mode_opt = RobotMode._member_map_.get(robot_mode_str)
-    robot_mode = RobotMode.AUTONOMOUS
-    if robot_mode_opt is None:
-      pass
-    else:
-      robot_mode = robot_mode_opt
+    ##robot_mode_str: str = LaunchConfiguration("operation_mode").perform()
+    ##robot_mode_str = robot_mode_str.upper()
+    ##robot_mode_opt = RobotMode._member_map_.get(robot_mode_str)
+    ##robot_mode = RobotMode.AUTONOMOUS
+    ##if robot_mode_opt is None:
+    ##  pass
+    ##else:
+    ##  robot_mode = robot_mode_opt
     
     ld = LaunchDescription()
     ld.add_action(robot_state_pub_node)
     ld.add_action(control_launch)
-    ld.add_action(laser_scanner_launch)
+    #ld.add_action(laser_scanner_launch)
 
-    if robot_mode is RobotMode.AUTONOMOUS or robot_mode is RobotMode.HYBRID:
-       ### Launch nav2
-
-       ### Check if mode is hybrid:
-       if robot_mode is RobotMode.HYBRID:  
-        ## Launch hybrid navigation packages
-        pass
-       pass
-    elif robot_mode is RobotMode.MAPPING:
-       ### Launch the mapping package
-       pass
-       
-    elif robot_mode is RobotMode.MANUAL:
-       ### Only launch the manual driving programms
-       pass
+    #if robot_mode is RobotMode.AUTONOMOUS or robot_mode is RobotMode.HYBRID:
+    #   ### Launch nav2
+#
+    #   ### Check if mode is hybrid:
+    #   if robot_mode is RobotMode.HYBRID:  
+    #    ## Launch hybrid navigation packages
+    #    pass
+    #   pass
+    #elif robot_mode is RobotMode.MAPPING:
+    #   ### Launch the mapping package
+    #   pass
+    #   
+    #elif robot_mode is RobotMode.MANUAL:
+    #   ### Only launch the manual driving programms
+    #   pass
     
     
 

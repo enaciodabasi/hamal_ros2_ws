@@ -3,7 +3,7 @@
 
   <xacro:macro name="hamal_ros2_control" params="name">
 
-    <ros2_control name="${name}" type="system">
+    <ros2_control name="hamal_hardware" type="system">
       
         <hardware>
           <plugin>hamal_hardware/HamalHardware</plugin>

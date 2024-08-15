@@ -19,7 +19,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 
 set(ethercat_interface_lib /usr/local/lib/libethercat_interface.so)
 #set(ethercat_interface_lib_INCLUDE_DIRS /home/rnd/ethercat_interface/include/)
-set(ethercat_interface_lib_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/external_libs/ethercat_interface/include/)
+set(ethercat_interface_lib_INCLUDE_DIRS /home/hamal22/ethercat_interface/include/)
 set(etherlab /usr/local/lib/libethercat.so)
 
 find_package(ament_cmake REQUIRED)
@@ -67,4 +67,9 @@ ament_export_dependencies(
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
+install(
+  DIRECTORY
+  config
+  DESTINATION share/${PROJECT_NAME}
+)
 ament_package()

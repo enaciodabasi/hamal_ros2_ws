@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot name="hamal" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find hamal_description)/ros2_control.xacro"/>
+  <xacro:include filename="$(find hamal_description)/urdf/ros2_control.xacro"/>
   <xacro:hamal_ros2_control
     name="hamal" />
   <!-- AGV Base -->
