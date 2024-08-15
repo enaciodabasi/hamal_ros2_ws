@@ -60,6 +60,12 @@ def generate_launch_description():
         ),
         launch_arguments=[('robot_description', robot_description)]
     )
+    
+    laser_scanner_launch = IncludeLaunchDescription(
+      launch_description_source=PythonLaunchDescriptionSource(
+        launch_file_path=[get_package_share_directory("hamal_mapping"), "launch", "hamal_laser_scanners.launch.py"]
+      )
+    )
 
     ### Get requested robot mode:
     robot_mode_str: str = LaunchConfiguration("operation_mode").perform()
@@ -72,8 +78,9 @@ def generate_launch_description():
       robot_mode = robot_mode_opt
     
     ld = LaunchDescription()
-    ld.add_action(control_launch)
     ld.add_action(robot_state_pub_node)
+    ld.add_action(control_launch)
+    ld.add_action(laser_scanner_launch)
 
     if robot_mode is RobotMode.AUTONOMOUS or robot_mode is RobotMode.HYBRID:
        ### Launch nav2
