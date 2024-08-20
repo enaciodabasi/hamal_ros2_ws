@@ -82,13 +82,15 @@ bool EthercatHandler::activateQuickStop()
 
 void EthercatHandler::cyclicTask()
 {
+    
     if(m_EnableDC)
     {
+        
         clock_gettime(m_DcHelper.clock, &m_DcHelper.wakeupTime);
     }
     while(m_EthercatLoopFlag)
     {
-
+        
         if(m_EnableDC)
         {
             
@@ -116,6 +118,14 @@ void EthercatHandler::cyclicTask()
             return ((lifterControlType == ControlType::Position) ? 0x08 : 0x09);
         }(); 
 
+        auto leftMotorStatusWord = m_Master->read<uint16_t>("domain_0", "somanet_node_2", "status_word");
+        auto rightMotorStatusWord = m_Master->read<uint16_t>("domain_0", "somanet_node_1", "status_word");
+        
+        if(leftMotorStatusWord && rightMotorStatusWord)
+        {
+          std::cout << leftMotorStatusWord.value() << std::endl;
+          std::cout << rightMotorStatusWord.value() << std::endl;
+        }
 
         m_Master->write<int8_t>(
             "domain_0",

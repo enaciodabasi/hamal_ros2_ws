@@ -29,6 +29,8 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_init(const 
     m_JointsMap.at(joint.name).targetVelocity = std::numeric_limits<double>::quiet_NaN();
   }
 
+  m_LifterHomingHelper = std::make_shared<HomingHelper>();
+
   m_EthercatController = std::make_unique<EthercatHandler>(
       m_EthercatConfigFilePath,
       m_LifterHomingHelper,
@@ -38,7 +40,12 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_init(const 
 
   if (!ec_ok)
   {
+    RCLCPP_ERROR(rclcpp::get_logger("HamalHardware"), "Could not initialize EtherCAT interface.");
     return hardware_interface::CallbackReturn::FAILURE;
+  }
+  else
+  {
+    RCLCPP_INFO(rclcpp::get_logger("HamalHardware"), "Initialized EtherCAT interface.");
   }
 
   return hardware_interface::CallbackReturn::SUCCESS;
@@ -92,7 +99,8 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_activate(co
     value.targetVelocity = 0.0;
   }
 
-  m_EthercatController->startTask();
+  if(m_EthercatController)
+    m_EthercatController->startTask();
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
@@ -100,17 +108,19 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_activate(co
 hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_deactivate(const rclcpp_lifecycle::State &previous_state)
 {
   m_EthercatController->m_EthercatLoopFlag = false;
-  return hardware_interface::CallbackReturn();
+  return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcpp::Time &time, const rclcpp::Duration &period)
 {
   if (!m_EthercatController->isEthercatOk())
   {
+    RCLCPP_INFO(rclcpp::get_logger("HamalHardware"), "Could not write.");
     m_EthercatController->setData<int32_t>("somanet_node_2", "target_velocity", 0);
     m_EthercatController->setData<int32_t>("somanet_node_1", "target_velocity", 0);
-    return hardware_interface::return_type::ERROR;
+    return hardware_interface::return_type::OK;
   }
+  RCLCPP_INFO(rclcpp::get_logger("HamalHardware"), "Write.");
   const auto rightWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams->m_RightWheelJointName).targetVelocity;
   const auto leftWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).targetVelocity;
 
@@ -204,6 +214,14 @@ hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcp
 
 hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp::Time &time, const rclcpp::Duration &period)
 {
+  if (!m_EthercatController->isEthercatOk())
+  {
+    RCLCPP_INFO(rclcpp::get_logger("HamalHardware"), "Could not read.");
+    
+    
+    return hardware_interface::return_type::OK;
+  }
+  RCLCPP_INFO(rclcpp::get_logger("HamalHardware"), "Read.");
   const auto rightWheelPosition = m_EthercatController->getData<int32_t>("somanet_node_1", "actual_position");
   const auto leftWheelPosition = m_EthercatController->getData<int32_t>("somanet_node_2", "actual_position");
   const auto lifterPosition = m_EthercatController->getData<int32_t>("somanet_node_0", "actual_position");

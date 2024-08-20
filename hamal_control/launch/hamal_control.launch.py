@@ -80,7 +80,7 @@ def generate_launch_description():
     
     ld.add_action(controller_manager_node)
     ld.add_action(joint_state_broadcaster_spawner)
-    ld.add_action(robot_controller_spawner)
+    #ld.add_action(robot_controller_spawner)
     ld.add_action(delay_robot_controller_spawner_after_joint_state_broadcaster_spawner)
 
 

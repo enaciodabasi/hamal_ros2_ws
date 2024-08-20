@@ -18,7 +18,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 )
 
 set(ethercat_interface_lib /usr/local/lib/libethercat_interface.so)
-#set(ethercat_interface_lib_INCLUDE_DIRS /home/rnd/ethercat_interface/include/)
+#set(ethercat_interface_lib_INCLUDE_DIRS /home/hamal22/ethercat_interface/include/)
 set(ethercat_interface_lib_INCLUDE_DIRS /home/hamal22/ethercat_interface/include/)
 set(etherlab /usr/local/lib/libethercat.so)
 

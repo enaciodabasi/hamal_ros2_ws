@@ -47,7 +47,7 @@ controller_config:
 
   domain_names:
     - domain_0
-  log_directory_path: "/home/naci/Projects/igh_master/logs/"
+  log_directory_path: "/home/hamal22/projects/hamal_ws/"
   cycle_period: 500
 ...
 ---

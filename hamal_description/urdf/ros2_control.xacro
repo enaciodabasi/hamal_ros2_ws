@@ -20,7 +20,7 @@
       </joint>
       <joint name="lifter_joint">
         <command_interface name="velocity"/>
-        <command_interface name="position"/>
+        
         <state_interface name="position"/>
         <state_interface name="velocity"/>
       </joint>
