@@ -103,6 +103,13 @@ namespace hamal_hardware
     std::shared_ptr<HamalHardwareParams> m_HardwareInterfaceParams;
 
     std::string m_EthercatConfigFilePath = "/home/hamal22/hamal_ros2_ws/src/hamal_hardware/config/ethercat_config.yaml";
+    
+    rclcpp::Time m_LastReadTime;
+    rclcpp::Time m_LastWriteTime;
+    
+    rclcpp::Duration m_ReadPeriod;
+    rclcpp::Duration m_WritePeriod;
+
 
     /**
      * @brief Turns motor position [increments] coming from EtherCAT to joint position [rad].
