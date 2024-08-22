@@ -40,7 +40,7 @@ struct HamalHardwareParams : public std::enable_shared_from_this<HamalHardwarePa
     std::string m_LifterJointName;
   };
 
-class HardwareInterfaceNode : rclcpp::Node
+class HardwareInterfaceNode : public rclcpp::Node
 {
 public:
 
@@ -48,6 +48,14 @@ public:
   ~HardwareInterfaceNode();
 
   bool init();
+
+  std::shared_ptr<HamalHardwareParams> getHardwareParams()
+  {
+    return m_Params;
+  }
+
+  const rclcpp::Time getCurrentTime();
+  
 
 private:
 

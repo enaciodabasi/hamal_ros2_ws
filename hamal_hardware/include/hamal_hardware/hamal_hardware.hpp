@@ -92,6 +92,7 @@ namespace hamal_hardware
     hardware_interface::return_type write(
         const rclcpp::Time &time, const rclcpp::Duration &period) override;
 
+
   private:
 
     std::unordered_map<std::string, Joint> m_JointsMap;
@@ -100,21 +101,27 @@ namespace hamal_hardware
 
     std::shared_ptr<HomingHelper> m_LifterHomingHelper;
 
-    std::shared_ptr<HamalHardwareParams> m_HardwareInterfaceParams;
+    std::shared_ptr<HardwareInterfaceNode> m_HardwareInterfaceNode;
+    rclcpp::executors::SingleThreadedExecutor m_HardwareInterfaceNodeExecutor;
+
+    std::shared_ptr<HamalHardwareParams> m_HardwareInterfaceParams;  
 
     std::string m_EthercatConfigFilePath = "/home/hamal22/hamal_ros2_ws/src/hamal_hardware/config/ethercat_config.yaml";
     
+    std::shared_ptr<rclcpp::Rate> m_SleepRate;
     rclcpp::Time m_LastReadTime;
     rclcpp::Time m_LastWriteTime;
+    bool m_InitialRead;
+    bool m_InitialWrite;
     
-    rclcpp::Duration m_ReadPeriod;
-    rclcpp::Duration m_WritePeriod;
+    std::unique_ptr<rclcpp::Duration> m_ReadPeriod;
+    std::unique_ptr<rclcpp::Duration> m_WritePeriod;
 
 
     /**
      * @brief Turns motor position [increments] coming from EtherCAT to joint position [rad].
      *
-     * @param motor_position Motor position in incrementsç
+     * @param motor_position Motor position in increments
      * @return const double: Joint position in radians.
      */
     inline const double motorPositionToJointPosition(const int32_t &motor_position)

@@ -48,7 +48,12 @@ void HardwareInterfaceNode::configure_params()
   m_Params->m_LeftWheelJointName = get_parameter("/hamal_hardware/left_wheel_joint_name").as_string();
   m_Params->m_RightWheelJointName = get_parameter("/hamal_hardware/right_wheel_joint_name").as_string();
   m_Params->m_LifterJointName = get_parameter("/hamal_hardware/lifter_joint").as_string();
-  
+  this->get_clock()->now();
+}
+
+const rclcpp::Time HardwareInterfaceNode::getCurrentTime()
+{
+  return this->get_clock()->now();
 }
 
 rclcpp_action::GoalResponse homingServerHandleGoalCallback(
