@@ -86,8 +86,8 @@ void EthercatHandler::cyclicTask()
 
     if (leftMotorStatusWord && rightMotorStatusWord)
     {
-      std::cout << leftMotorStatusWord.value() << std::endl;
-      std::cout << rightMotorStatusWord.value() << std::endl;
+      /* std::cout << leftMotorStatusWord.value() << std::endl;
+      std::cout << rightMotorStatusWord.value() << std::endl; */
     }
 
     m_Master->write<int8_t>("domain_0", "somanet_node_0", "op_mode", 0x09);

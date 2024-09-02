@@ -49,6 +49,7 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_init(const 
   }
 
   m_HardwareInterfaceNode = std::make_shared<HardwareInterfaceNode>();
+  m_HardwareInterfaceNode->init();
   m_HardwareInterfaceParams = m_HardwareInterfaceNode->getHardwareParams();
 
   const double periodSec = (1.0 / m_HardwareInterfaceParams->m_LoopFrequency);
@@ -174,7 +175,12 @@ hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp
   {
     
     return hardware_interface::return_type::OK;
+  }if((!((time - m_LastWriteTime) >= *m_WritePeriod)) || !m_InitialWrite)
+  {
+    return hardware_interface::return_type::OK;
   }
+
+  if(m_InitialWrite){m_InitialWrite = false;}
 
   if(m_InitialRead){m_InitialRead = false;}
 

@@ -47,7 +47,7 @@ void HardwareInterfaceNode::configure_params()
   m_Params->m_LifterIncrement = get_parameter("/hamal_hardware/lifter_increment").as_int();
   m_Params->m_LeftWheelJointName = get_parameter("/hamal_hardware/left_wheel_joint_name").as_string();
   m_Params->m_RightWheelJointName = get_parameter("/hamal_hardware/right_wheel_joint_name").as_string();
-  m_Params->m_LifterJointName = get_parameter("/hamal_hardware/lifter_joint").as_string();
+  m_Params->m_LifterJointName = get_parameter("/hamal_hardware/lifter_joint_name").as_string();
   this->get_clock()->now();
 }
 
