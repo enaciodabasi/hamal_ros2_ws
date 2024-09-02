@@ -1,0 +1,14 @@
+[Unit]
+Description=Startup service for activating the hardware components.
+After=ethercat.service network-online.target local-fs.target
+Requires=ethercat.service local-fs.target network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/hamal_startup-start.sh
+ExecStop=/usr/local/sbin/hamal_startup-stop.sh
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

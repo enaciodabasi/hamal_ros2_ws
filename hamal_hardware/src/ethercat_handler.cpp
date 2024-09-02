@@ -72,7 +72,7 @@ void EthercatHandler::cyclicTask()
     if (m_EnableDC)
     {
       setTaskWakeUpTime();
-      sleep_task(m_DcHelper.clock, TIMER_ABSTIME, &m_DcHelper.wakeupTime, NULL);
+      sleep_task(m_DcHelper.clock, TIMER_ABSTIME, &m_DcHelper.wakeupTime, NULL);  
 
       m_Master->setMasterTime(timespecToNanoSec(m_DcHelper.wakeupTime));
     }
