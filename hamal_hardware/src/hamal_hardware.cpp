@@ -49,8 +49,32 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_init(const 
   }
 
   m_HardwareInterfaceNode = std::make_shared<HardwareInterfaceNode>();
-  m_HardwareInterfaceNode->init();
+  m_HardwareInfoArray = std::make_shared<hamal_custom_interfaces::msg::HardwareInformationArray>(hamal_custom_interfaces::msg::HardwareInformationArray());
+  
+  m_HardwareInterfaceNode->init(m_HardwareInfoArray);
   m_HardwareInterfaceParams = m_HardwareInterfaceNode->getHardwareParams();
+  
+  auto& hardwareArray = m_HardwareInfoArray->hardware_info_array;
+  hardwareArray.resize(3); // 3 slaves
+  // Setup lifter information
+  hardwareArray.at(0).slave_name = m_HardwareInterfaceParams->m_LifterJointName;
+  // Setup right wheel information
+  hardwareArray.at(1).slave_name = m_HardwareInterfaceParams->m_RightWheelJointName;
+  // Setup left wheel information
+  hardwareArray.at(2).slave_name = m_HardwareInterfaceParams->m_LeftWheelJointName;
+
+  const auto initTime = m_HardwareInterfaceNode->getCurrentTime();
+  for(auto info : hardwareArray)
+  {
+    info.ctrl_word = 0x0;
+    info.status_word = 0x0;
+    info.current_pos = 0.0;
+    info.current_vel = 0.0;
+    info.current_state = "";
+    info.target_pos = 0.0;
+    info.target_vel = 0.0;
+    info.timestamp = initTime;
+  }  
 
   const double periodSec = (1.0 / m_HardwareInterfaceParams->m_LoopFrequency);
   m_ReadPeriod = std::make_unique<rclcpp::Duration>(rclcpp::Duration(std::chrono::duration<double>(periodSec)));
@@ -59,7 +83,6 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_init(const 
 
   m_InitialWrite = true;
   m_InitialRead = true;
-  const auto initTime = m_HardwareInterfaceNode->getCurrentTime();
   m_LastWriteTime = initTime;
   m_LastReadTime = initTime;
 
@@ -159,11 +182,14 @@ hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcp
 
   RCLCPP_INFO(rclcpp::get_logger("HamalHardware"), "Write.");
 
-  const auto rightWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams->m_RightWheelJointName).targetVelocity;
-  const auto leftWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).targetVelocity;
+  const double rightWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams->m_RightWheelJointName).targetVelocity;
+  const double leftWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).targetVelocity;
 
   m_EthercatController->setData<int32_t>("somanet_node_2", "target_velocity", (jointVelocityToMotorVelocity(leftWheelTargetVel)));
   m_EthercatController->setData<int32_t>("somanet_node_1", "target_velocity", (jointVelocityToMotorVelocity(rightWheelTargetVel)));
+
+  m_HardwareInfoArray->hardware_info_array.at(1).target_vel = (double)jointVelocityToMotorVelocity(rightWheelTargetVel);
+  m_HardwareInfoArray->hardware_info_array.at(2).target_vel = (double)jointVelocityToMotorVelocity(leftWheelTargetVel);
 
   return hardware_interface::return_type::OK;
 }
@@ -180,8 +206,6 @@ hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp
     return hardware_interface::return_type::OK;
   }
 
-  if(m_InitialWrite){m_InitialWrite = false;}
-
   if(m_InitialRead){m_InitialRead = false;}
 
   if (!m_EthercatController->isEthercatOk())
@@ -193,6 +217,32 @@ hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp
   }
   m_LastReadTime = time;
 
+  const auto lifterStatusWord = m_EthercatController->getData<uint16_t>("somanet_node_0", "status_word");
+  const auto rightWheelStatusWord = m_EthercatController->getData<uint16_t>("somanet_node_1", "status_word");
+  const auto leftWheelStatusWord = m_EthercatController->getData<uint16_t>("somanet_node_2", "status_word");
+  if(lifterStatusWord && rightWheelStatusWord && leftWheelStatusWord)
+  {
+    m_HardwareInfoArray->hardware_info_array.at(0).status_word = lifterStatusWord.value();
+    m_HardwareInfoArray->hardware_info_array.at(1).status_word = rightWheelStatusWord.value();
+    m_HardwareInfoArray->hardware_info_array.at(2).status_word = leftWheelStatusWord.value();
+  }
+
+  const auto lifterCtrlWord = m_EthercatController->getData<uint16_t>("somanet_node_0", "ctrl_word");
+  const auto rightWheelCtrlWord = m_EthercatController->getData<uint16_t>("somanet_node_1", "ctrl_word");
+  const auto leftWheelCtrlWord = m_EthercatController->getData<uint16_t>("somanet_node_2", "ctrl_word");
+  if(lifterCtrlWord && rightWheelCtrlWord && leftWheelCtrlWord)
+  {
+    m_HardwareInfoArray->hardware_info_array.at(0).ctrl_word = lifterCtrlWord.value();
+    m_HardwareInfoArray->hardware_info_array.at(1).ctrl_word = rightWheelCtrlWord.value();
+    m_HardwareInfoArray->hardware_info_array.at(2).ctrl_word = leftWheelCtrlWord.value();
+  }
+
+  auto slaveStates = m_EthercatController->getSlaveStatus();
+  for(std::size_t i = 0; i < slaveStates.size(); i++)
+  {
+    m_HardwareInfoArray->hardware_info_array.at(i).slave_name = slaveStates.at(i).second;
+  }
+
   const auto rightWheelPosition = m_EthercatController->getData<int32_t>("somanet_node_1", "actual_position");
   const auto leftWheelPosition = m_EthercatController->getData<int32_t>("somanet_node_2", "actual_position");
   const auto lifterPosition = m_EthercatController->getData<int32_t>("somanet_node_0", "actual_position");
@@ -200,6 +250,10 @@ hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp
   { 
     m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).currentPosition = (motorPositionToJointPosition(leftWheelPosition.value())) * -1.0;
     m_JointsMap.at(m_HardwareInterfaceParams->m_RightWheelJointName).currentPosition = (motorPositionToJointPosition(rightWheelPosition.value())) /* * 0.5 */;
+
+    m_HardwareInfoArray->hardware_info_array.at(1).current_pos = m_JointsMap.at(m_HardwareInterfaceParams->m_RightWheelJointName).currentPosition;
+    m_HardwareInfoArray->hardware_info_array.at(2).current_pos = m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).currentPosition;
+
   }
   
   const auto rightWheelVelocity = m_EthercatController->getData<int32_t>("somanet_node_1", "actual_velocity");
@@ -209,8 +263,12 @@ hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp
   {
     m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).currentVelocity = motorVelocityToJointVelocity(leftWheelVelocity.value());
     m_JointsMap.at(m_HardwareInterfaceParams->m_RightWheelJointName).currentVelocity = motorVelocityToJointVelocity(rightWheelVelocity.value());
+
+    m_HardwareInfoArray->hardware_info_array.at(1).current_vel = m_JointsMap.at(m_HardwareInterfaceParams->m_RightWheelJointName).currentVelocity;
+    m_HardwareInfoArray->hardware_info_array.at(2).current_vel = m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).currentVelocity;
+
   }
-  
+
   m_SleepRate->sleep();
 
   return hardware_interface::return_type::OK;

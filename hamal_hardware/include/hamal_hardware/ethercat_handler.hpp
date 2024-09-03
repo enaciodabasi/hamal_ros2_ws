@@ -34,20 +34,7 @@ class EthercatHandler : public ethercat_interface::controller::Controller
 
     bool m_EthercatLoopFlag = true;
 
-    const std::vector<std::pair<std::string, std::string>> getSlaveStatus() const
-    {
-        const std::string lifterStatus = m_Master->getSlaveStateString("domain_0", "somanet_node_0").value();
-        const std::string leftWheelStatus = m_Master->getSlaveStateString("domain_0", "somanet_node_1").value();
-        const std::string rightWheelStatus = m_Master->getSlaveStateString("domain_0", "somanet_node_2").value();
-
-        
-        return {
-            {"lifter_joint", lifterStatus},
-            {"left_wheel_joint", leftWheelStatus},
-            {"right_wheel_joint", rightWheelStatus}
-        };
-
-    }
+    const std::vector<std::pair<std::string, std::string>> getSlaveStatus() const;
 
     inline void setLifterControlType(const ControlType& control_type)
     {

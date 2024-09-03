@@ -22,9 +22,18 @@ HardwareInterfaceNode::~HardwareInterfaceNode()
 
 }
 
-bool HardwareInterfaceNode::init()
+bool HardwareInterfaceNode::init(std::shared_ptr<hamal_custom_interfaces::msg::HardwareInformationArray>& info_array_shptr)
 {
   m_Params = std::make_shared<HamalHardwareParams>();
+  m_HardwareInfoArrayShPtr = info_array_shptr;
+  
+  m_HardwareInfoPublishTimer = this->create_wall_timer(
+    std::chrono::duration<double>(HARDWARE_INFO_PUBLISH_PERIOD), // Publish at 50 Hz.
+    [this](){
+      const auto infoArray = *this->m_HardwareInfoArrayShPtr;
+      this->m_HwInfoPub->publish(infoArray);
+    }
+  );
 
   configure_params();
 }

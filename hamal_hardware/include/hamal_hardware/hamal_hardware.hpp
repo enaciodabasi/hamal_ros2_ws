@@ -104,6 +104,8 @@ namespace hamal_hardware
     std::shared_ptr<HardwareInterfaceNode> m_HardwareInterfaceNode;
     rclcpp::executors::SingleThreadedExecutor m_HardwareInterfaceNodeExecutor;
 
+    std::shared_ptr<hamal_custom_interfaces::msg::HardwareInformationArray> m_HardwareInfoArray;
+
     std::shared_ptr<HamalHardwareParams> m_HardwareInterfaceParams;  
 
     std::string m_EthercatConfigFilePath = "/home/hamal22/hamal_ros2_ws/src/hamal_hardware/config/ethercat_config.yaml";

@@ -61,6 +61,19 @@ bool EthercatHandler::activateQuickStop()
   }
 }
 
+const std::vector<std::pair<std::string, std::string>> EthercatHandler::getSlaveStatus() const
+{
+  const std::string lifterStatus = m_Master->getSlaveStateString("domain_0", "somanet_node_0").value();
+  const std::string leftWheelStatus = m_Master->getSlaveStateString("domain_0", "somanet_node_1").value();
+  const std::string rightWheelStatus = m_Master->getSlaveStateString("domain_0", "somanet_node_2").value();
+  
+  return {
+      {"lifter_joint", lifterStatus},
+      {"left_wheel_joint", leftWheelStatus},
+      {"right_wheel_joint", rightWheelStatus}
+  };
+}
+
 void EthercatHandler::cyclicTask()
 {
   if (m_EnableDC)
@@ -83,11 +96,24 @@ void EthercatHandler::cyclicTask()
 
     auto leftMotorStatusWord = m_Master->read<uint16_t>("domain_0", "somanet_node_2", "status_word");
     auto rightMotorStatusWord = m_Master->read<uint16_t>("domain_0", "somanet_node_1", "status_word");
+    auto lifterMotorStatusWord = m_Master->read<uint16_t>("domain_0", "somanet_node_1", "status_word");
 
-    if (leftMotorStatusWord && rightMotorStatusWord)
+    if (leftMotorStatusWord && rightMotorStatusWord && lifterMotorStatusWord)
     {
-      /* std::cout << leftMotorStatusWord.value() << std::endl;
-      std::cout << rightMotorStatusWord.value() << std::endl; */
+      this->setData<uint16_t>("somanet_node_0", "status_word", lifterMotorStatusWord.value());
+      this->setData<uint16_t>("somanet_node_1", "status_word", rightMotorStatusWord.value());
+      this->setData<uint16_t>("somanet_node_2", "status_word", leftMotorStatusWord.value()); 
+    }
+
+    auto leftMotorCtrlWord = m_Master->read<uint16_t>("domain_0", "somanet_node_2", "ctrl_word");
+    auto rightMotorCtrlWord = m_Master->read<uint16_t>("domain_0", "somanet_node_1", "ctrl_word");
+    auto lifterMotorCtrlWord = m_Master->read<uint16_t>("domain_0", "somanet_node_1", "ctrl_word");
+
+    if (leftMotorCtrlWord && rightMotorCtrlWord && lifterMotorCtrlWord)
+    {
+      this->setData<uint16_t>("somanet_node_0", "ctrl_word", lifterMotorCtrlWord.value());
+      this->setData<uint16_t>("somanet_node_1", "ctrl_word", rightMotorCtrlWord.value());
+      this->setData<uint16_t>("somanet_node_2", "ctrl_word", leftMotorCtrlWord.value());   
     }
 
     m_Master->write<int8_t>("domain_0", "somanet_node_0", "op_mode", 0x09);

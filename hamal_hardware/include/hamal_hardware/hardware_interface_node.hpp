@@ -20,6 +20,7 @@
 #include <hamal_custom_interfaces/msg/hardware_information_array.hpp>
 #include <hamal_custom_interfaces/action/homing_operation.hpp>
 
+constexpr double HARDWARE_INFO_PUBLISH_PERIOD = 1.0 / 50.0;
 
 struct HamalHardwareParams : public std::enable_shared_from_this<HamalHardwareParams>
   {
@@ -47,8 +48,22 @@ public:
   HardwareInterfaceNode();
   ~HardwareInterfaceNode();
 
-  bool init();
+  bool init(std::shared_ptr<hamal_custom_interfaces::msg::HardwareInformationArray>& info_array_shptr);
 
+  /**
+   * @brief Publishes hardware information array to ROS 2 network.
+   * 
+   * @param info_array 
+   * @return true 
+   * @return false 
+   */
+  bool publishHardwareInformation(const hamal_custom_interfaces::msg::HardwareInformationArray& info_array);
+
+  /**
+   * @brief Get the HardwareParams object
+   * 
+   * @return std::shared_ptr<HamalHardwareParams> 
+   */
   std::shared_ptr<HamalHardwareParams> getHardwareParams()
   {
     return m_Params;
@@ -64,6 +79,10 @@ private:
   std::shared_ptr<rclcpp_action::Server<hamal_custom_interfaces::action::HomingOperation>> m_HomingServer;
 
   std::shared_ptr<HamalHardwareParams> m_Params;
+
+  std::shared_ptr<rclcpp::TimerBase> m_HardwareInfoPublishTimer;
+  
+  std::shared_ptr<hamal_custom_interfaces::msg::HardwareInformationArray> m_HardwareInfoArrayShPtr;
 
   void configure_params();
 
