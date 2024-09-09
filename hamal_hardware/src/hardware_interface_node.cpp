@@ -27,6 +27,11 @@ bool HardwareInterfaceNode::init(std::shared_ptr<hamal_custom_interfaces::msg::H
   m_Params = std::make_shared<HamalHardwareParams>();
   m_HardwareInfoArrayShPtr = info_array_shptr;
   
+  m_HwInfoPub = this->create_publisher<hamal_custom_interfaces::msg::HardwareInformationArray>(
+    "/hamal/hardware_information",
+    rclcpp::SystemDefaultsQoS()
+  );
+  
   m_HardwareInfoPublishTimer = this->create_wall_timer(
     std::chrono::duration<double>(HARDWARE_INFO_PUBLISH_PERIOD), // Publish at 50 Hz.
     [this](){

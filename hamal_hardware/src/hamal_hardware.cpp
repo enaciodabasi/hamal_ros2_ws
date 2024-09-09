@@ -136,9 +136,8 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_activate(co
     value.targetPosition = 0.0;
     value.targetVelocity = 0.0;
   }
-
-  if(m_EthercatController)
-    m_EthercatController->startTask();
+  
+  m_EthercatController->startTask();
 
   m_HardwareInterfaceNodeExecutor.add_node(m_HardwareInterfaceNode);
   std::thread nodeSpinThread = std::thread(
@@ -164,7 +163,7 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_deactivate(
 hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcpp::Time &time, const rclcpp::Duration &period)
 {
 
-  if((!((time - m_LastWriteTime) >= *m_WritePeriod)) || !m_InitialWrite)
+  if((!((time - m_LastWriteTime) >= *m_WritePeriod)) && !m_InitialWrite)
   {
     return hardware_interface::return_type::OK;
   }
@@ -179,8 +178,6 @@ hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcp
     m_EthercatController->setData<int32_t>("somanet_node_1", "target_velocity", 0);
     return hardware_interface::return_type::OK;
   }
-
-  RCLCPP_INFO(rclcpp::get_logger("HamalHardware"), "Write.");
 
   const double rightWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams->m_RightWheelJointName).targetVelocity;
   const double leftWheelTargetVel = m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).targetVelocity;
@@ -197,11 +194,7 @@ hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcp
 hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp::Time &time, const rclcpp::Duration &period)
 {
 
-  if((!((time - m_LastReadTime) > *m_ReadPeriod)) || !m_InitialRead)
-  {
-    
-    return hardware_interface::return_type::OK;
-  }if((!((time - m_LastWriteTime) >= *m_WritePeriod)) || !m_InitialWrite)
+  if((!((time - m_LastReadTime) > *m_ReadPeriod)) && !m_InitialRead)
   {
     return hardware_interface::return_type::OK;
   }
@@ -209,10 +202,7 @@ hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp
   if(m_InitialRead){m_InitialRead = false;}
 
   if (!m_EthercatController->isEthercatOk())
-  {
-    RCLCPP_INFO(rclcpp::get_logger("HamalHardware"), "Could not read.");
-    
-    
+  {     
     return hardware_interface::return_type::OK;
   }
   m_LastReadTime = time;
@@ -240,7 +230,7 @@ hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp
   auto slaveStates = m_EthercatController->getSlaveStatus();
   for(std::size_t i = 0; i < slaveStates.size(); i++)
   {
-    m_HardwareInfoArray->hardware_info_array.at(i).slave_name = slaveStates.at(i).second;
+    m_HardwareInfoArray->hardware_info_array.at(i).current_state = slaveStates.at(i).second;
   }
 
   const auto rightWheelPosition = m_EthercatController->getData<int32_t>("somanet_node_1", "actual_position");

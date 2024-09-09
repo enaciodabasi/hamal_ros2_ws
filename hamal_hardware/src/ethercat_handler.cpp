@@ -17,7 +17,7 @@ EthercatHandler::EthercatHandler(const std::string& config_file_path, std::share
                                  bool enable_dc)
   : ethercat_interface::controller::Controller(config_file_path)
   , m_HomingHelperPtr(homing_helper_ptr)
-  , m_EnableDC(enable_dc)
+  , m_EnableDC(true)
 {
   m_PrevUpdateTimePoint = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now());
 }
@@ -89,12 +89,12 @@ void EthercatHandler::cyclicTask()
 
       m_Master->setMasterTime(timespecToNanoSec(m_DcHelper.wakeupTime));
     }
-
+    
     m_Master->receive("domain_0");
 
     bool slavesEnabled = m_Master->enableSlaves();
 
-    auto leftMotorStatusWord = m_Master->read<uint16_t>("domain_0", "somanet_node_2", "status_word");
+    /* auto leftMotorStatusWord = m_Master->read<uint16_t>("domain_0", "somanet_node_2", "status_word");
     auto rightMotorStatusWord = m_Master->read<uint16_t>("domain_0", "somanet_node_1", "status_word");
     auto lifterMotorStatusWord = m_Master->read<uint16_t>("domain_0", "somanet_node_1", "status_word");
 
@@ -121,12 +121,6 @@ void EthercatHandler::cyclicTask()
     m_Master->write<int8_t>("domain_0", "somanet_node_1", "op_mode", 0x09);
 
     m_Master->write<int8_t>("domain_0", "somanet_node_2", "op_mode", 0x09);
-
-    // slavesEnabled = m_Master->enableSlaves();
-
-    /* const auto current_time =
-    std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()); const auto elapsed =
-    (m_PrevUpdateTimePoint - current_time).count() / 1000.0; m_PrevUpdateTimePoint = current_time; */
 
     if (m_ActivateQuickStop)
     {
@@ -163,7 +157,7 @@ void EthercatHandler::cyclicTask()
       setData<int32_t>("somanet_node_0", "actual_velocity", lifterVelOpt.value());
     }
 
-    if (slavesEnabled && !m_HomingHelperPtr->isHomingActive)
+    if (slavesEnabled)
     {
 
       auto leftTargetVelOpt = getData<int32_t>("somanet_node_2", "target_velocity");
@@ -182,7 +176,7 @@ void EthercatHandler::cyclicTask()
       m_Master->write("domain_0", "somanet_node_1", "target_velocity", 0);
       m_Master->write("domain_0", "somanet_node_2", "target_velocity", 0);
       m_Master->write("domain_0", "somanet_node_0", "target_velocity", 0);
-    }
+    } */
 
     if (m_EnableDC)
     {
