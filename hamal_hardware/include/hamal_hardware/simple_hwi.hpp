@@ -47,10 +47,12 @@ struct Joint
   {
   }
 };
-
+class HamalHardware;
 class EthercatHandler : public ethercat_interface::controller::Controller
 {
+
 public:
+friend class HamalHardware;
   EthercatHandler(const std::string& config_file_path, bool enable_dc = true);
 
   ~EthercatHandler();
@@ -72,6 +74,14 @@ public:
     m_CyclicTaskThread = std::thread(&EthercatHandler::cyclicTask, this);
     //this->updateThreadInfo();
     
+  }
+
+  void setClock()
+  {
+    if (m_EnableDC)
+  {
+    clock_gettime(m_DcHelper.clock, &m_DcHelper.wakeupTime);
+  }
   }
 
 private:

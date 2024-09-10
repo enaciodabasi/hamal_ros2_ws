@@ -19,6 +19,7 @@ hamal_hardware::EthercatHandler::EthercatHandler(const std::string& config_file_
 
 hamal_hardware::EthercatHandler::~EthercatHandler()
 {
+  m_EthercatLoopFlag = false;
   joinThread();
 }
 
@@ -35,20 +36,21 @@ const std::vector<std::pair<std::string, std::string>> hamal_hardware::EthercatH
 
 void hamal_hardware::EthercatHandler::cyclicTask()
 {
-  struct sched_param param;
-  param.sched_priority = 49;
-  
-  pthread_t this_thread = pthread_self();
-  if(pthread_setschedparam(this_thread, SCHED_FIFO, &param))
-  {
-    return;
-  }
-  if (m_EnableDC)
-  {
-    clock_gettime(m_DcHelper.clock, &m_DcHelper.wakeupTime);
-  }
-  while (m_EthercatLoopFlag)
-  {
+  //struct sched_param param;
+  //param.sched_priority = 49;
+  //
+  //pthread_t this_thread = pthread_self();
+  //if(pthread_setschedparam(this_thread, SCHED_FIFO, &param))
+  //{
+  //  std::cout << "Could not change thread priority;" << std::endl;
+  //  return;
+  //}
+  //sif (m_EnableDC)
+  //s{
+  //s  clock_gettime(m_DcHelper.clock, &m_DcHelper.wakeupTime);
+  //s}
+  /* while (m_EthercatLoopFlag)
+  { */
     if (m_EnableDC)
     {
       setTaskWakeUpTime();
@@ -70,7 +72,7 @@ void hamal_hardware::EthercatHandler::cyclicTask()
 
     m_Master->send("domain_0");
     m_EthercatOk = slavesEnabled;
-  }
+  //}
 }
 
 hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_init(const hardware_interface::HardwareInfo& info)
@@ -146,8 +148,18 @@ hamal_hardware::HamalHardware::on_activate(const rclcpp_lifecycle::State& previo
     RCLCPP_INFO(rclcpp::get_logger("HamalHardware"), "Initialized EtherCAT interface.");
   }
 
-  m_EthercatController->startTask();
+  struct sched_param param;
+  param.sched_priority = 49;
+  
+  pthread_t this_thread = pthread_self();
+  if(pthread_setschedparam(this_thread, SCHED_FIFO, &param))
+  {
+    std::cout << "Could not change thread priority;" << std::endl;
+    return hardware_interface::CallbackReturn::FAILURE;
+  }
 
+  //m_EthercatController->startTask();
+  m_EthercatController->setClock();
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -167,7 +179,7 @@ hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcp
 hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp::Time& time,
                                                                     const rclcpp::Duration& period)
 {
-
+  m_EthercatController->cyclicTask();
   return hardware_interface::return_type::OK;
 }
 
