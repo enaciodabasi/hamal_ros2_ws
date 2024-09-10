@@ -1,14 +1,21 @@
 extern crate yaml_rust;
 use std::{env, fs::File, io::Read};
 
-use yaml_rust::{yaml, YamlLoader};
+use yaml_rust::{yaml, Yaml, YamlLoader};
 
+#[derive(Default)]
 struct ServiceTemplateParams {
   file_name: String,
+  ros_domain_id: i32,
+  
 
 }
 
 impl ServiceTemplateParams{
+
+  fn new() -> Self {
+    ServiceTemplateParams { ..Default::default() }
+  }
 
   fn parse_docs(&mut self, doc: &yaml::Yaml)
   {
@@ -33,7 +40,14 @@ fn main() {
     Ok(docs) => yaml_docs = docs,
     Err(_e) => return
   }
+  
+  
+  for doc in &yaml_docs {
 
+    let mut params: ServiceTemplateParams = ServiceTemplateParams::new();
+    params.parse_docs(doc);
 
+  } 
+  
 
 }

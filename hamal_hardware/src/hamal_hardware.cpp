@@ -36,18 +36,6 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_init(const 
       m_LifterHomingHelper,
       true);
 
-  bool ec_ok = m_EthercatController->setup();
-
-  if (!ec_ok)
-  {
-    RCLCPP_ERROR(rclcpp::get_logger("HamalHardware"), "Could not initialize EtherCAT interface.");
-    return hardware_interface::CallbackReturn::FAILURE;
-  }
-  else
-  {
-    RCLCPP_INFO(rclcpp::get_logger("HamalHardware"), "Initialized EtherCAT interface.");
-  }
-
   m_HardwareInterfaceNode = std::make_shared<HardwareInterfaceNode>();
   m_HardwareInfoArray = std::make_shared<hamal_custom_interfaces::msg::HardwareInformationArray>(hamal_custom_interfaces::msg::HardwareInformationArray());
   
@@ -135,6 +123,18 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_activate(co
     value.currentVelocity = 0.0;
     value.targetPosition = 0.0;
     value.targetVelocity = 0.0;
+  }
+
+  bool ec_ok = m_EthercatController->setup();
+
+  if (!ec_ok)
+  {
+    RCLCPP_ERROR(rclcpp::get_logger("HamalHardware"), "Could not initialize EtherCAT interface.");
+    return hardware_interface::CallbackReturn::FAILURE;
+  }
+  else
+  {
+    RCLCPP_INFO(rclcpp::get_logger("HamalHardware"), "Initialized EtherCAT interface.");
   }
   
   m_EthercatController->startTask();

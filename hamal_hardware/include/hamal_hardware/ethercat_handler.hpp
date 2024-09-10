@@ -61,7 +61,7 @@ class EthercatHandler : public ethercat_interface::controller::Controller
 
     void startTask() override
     {
-        this->setThreadParams(SCHED_FIFO, 99);
+        //this->setThreadParams(SCHED_FIFO, 99);
         m_CyclicTaskThread = std::thread(
             &EthercatHandler::cyclicTask,
             this
