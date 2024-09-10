@@ -11,7 +11,6 @@
 
 #include "hamal_hardware/simple_hwi.hpp"
 
-
 hamal_hardware::EthercatHandler::EthercatHandler(const std::string& config_file_path, bool enable_dc)
   : ethercat_interface::controller::Controller(config_file_path), m_EnableDC(true)
 {
@@ -36,43 +35,74 @@ const std::vector<std::pair<std::string, std::string>> hamal_hardware::EthercatH
 
 void hamal_hardware::EthercatHandler::cyclicTask()
 {
-  //struct sched_param param;
-  //param.sched_priority = 49;
+  // struct sched_param param;
+  // param.sched_priority = 49;
   //
-  //pthread_t this_thread = pthread_self();
-  //if(pthread_setschedparam(this_thread, SCHED_FIFO, &param))
+  // pthread_t this_thread = pthread_self();
+  // if(pthread_setschedparam(this_thread, SCHED_FIFO, &param))
   //{
-  //  std::cout << "Could not change thread priority;" << std::endl;
-  //  return;
-  //}
-  //sif (m_EnableDC)
-  //s{
-  //s  clock_gettime(m_DcHelper.clock, &m_DcHelper.wakeupTime);
-  //s}
+  //   std::cout << "Could not change thread priority;" << std::endl;
+  //   return;
+  // }
+  // sif (m_EnableDC)
+  // s{
+  // s  clock_gettime(m_DcHelper.clock, &m_DcHelper.wakeupTime);
+  // s}
   /* while (m_EthercatLoopFlag)
   { */
-    if (m_EnableDC)
-    {
-      setTaskWakeUpTime();
-      sleep_task(m_DcHelper.clock, TIMER_ABSTIME, &m_DcHelper.wakeupTime, NULL);
+  if (m_EnableDC)
+  {
+    setTaskWakeUpTime();
+    sleep_task(m_DcHelper.clock, TIMER_ABSTIME, &m_DcHelper.wakeupTime, NULL);
 
-      m_Master->setMasterTime(timespecToNanoSec(m_DcHelper.wakeupTime));
-    }
+    m_Master->setMasterTime(timespecToNanoSec(m_DcHelper.wakeupTime));
+  }
 
-    m_Master->receive("domain_0");
+  m_Master->receive("domain_0");
 
-    bool slavesEnabled = m_Master->enableSlaves();
+  bool slavesEnabled = m_Master->enableSlaves();
 
-    if (m_EnableDC)
-    {
-      clock_gettime(m_DcHelper.clock, &m_DcHelper.currentTime);
-      m_Master->syncMasterClock(timespecToNanoSec(m_DcHelper.currentTime), m_DcHelper);
-    }
-    
+  if (m_EnableDC)
+  {
+    clock_gettime(m_DcHelper.clock, &m_DcHelper.currentTime);
+    m_Master->syncMasterClock(timespecToNanoSec(m_DcHelper.currentTime), m_DcHelper);
+  }
 
-    m_Master->send("domain_0");
-    m_EthercatOk = slavesEnabled;
+  m_Master->send("domain_0");
+  m_EthercatOk = slavesEnabled;
   //}
+}
+
+void hamal_hardware::EthercatHandler::read()
+{
+  if (m_EnableDC)
+  {
+    setTaskWakeUpTime();
+    sleep_task(m_DcHelper.clock, TIMER_ABSTIME, &m_DcHelper.wakeupTime, NULL);
+
+    m_Master->setMasterTime(timespecToNanoSec(m_DcHelper.wakeupTime));
+  }
+
+  m_Master->receive("domain_0");
+
+  bool slavesEnabled = m_Master->enableSlaves();
+  m_EthercatOk = slavesEnabled;
+}
+
+void hamal_hardware::EthercatHandler::write()
+{
+  if (m_EnableDC)
+  {
+    clock_gettime(m_DcHelper.clock, &m_DcHelper.currentTime);
+    m_Master->syncMasterClock(timespecToNanoSec(m_DcHelper.currentTime), m_DcHelper);
+  }
+
+  m_Master->write<int8_t>("domain_0", "somanet_node_0", "op_mode", 0x09);
+  m_Master->write<int8_t>("domain_0", "somanet_node_1", "op_mode", 0x09);
+  m_Master->write<int8_t>("domain_0", "somanet_node_2", "op_mode", 0x09);
+
+
+  m_Master->send("domain_0");
 }
 
 hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_init(const hardware_interface::HardwareInfo& info)
@@ -91,7 +121,7 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_init(const 
     m_JointsMap.at(joint.name).targetPosition = std::numeric_limits<double>::quiet_NaN();
     m_JointsMap.at(joint.name).targetVelocity = std::numeric_limits<double>::quiet_NaN();
   }
-  
+
   m_EthercatController = std::make_unique<EthercatHandler>(m_EthercatConfigFilePath, true);
 
   return hardware_interface::CallbackReturn::SUCCESS;
@@ -150,15 +180,15 @@ hamal_hardware::HamalHardware::on_activate(const rclcpp_lifecycle::State& previo
 
   struct sched_param param;
   param.sched_priority = 49;
-  
+
   pthread_t this_thread = pthread_self();
-  if(pthread_setschedparam(this_thread, SCHED_FIFO, &param))
+  if (pthread_setschedparam(this_thread, SCHED_FIFO, &param))
   {
     std::cout << "Could not change thread priority;" << std::endl;
     return hardware_interface::CallbackReturn::FAILURE;
   }
 
-  //m_EthercatController->startTask();
+  // m_EthercatController->startTask();
   m_EthercatController->setClock();
   return hardware_interface::CallbackReturn::SUCCESS;
 }

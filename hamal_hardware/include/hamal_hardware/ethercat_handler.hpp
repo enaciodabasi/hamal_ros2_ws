@@ -1,12 +1,12 @@
 /**
  * @file ethercat_handler.hpp
  * @author your name (you@domain.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-07-02
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 
 #ifndef ETHERCAT_HANDLER_HPP_
@@ -19,88 +19,85 @@
 #include <vector>
 #include <chrono>
 
-
 class EthercatHandler : public ethercat_interface::controller::Controller
 {
-  public:
+public:
+  EthercatHandler(const std::string& config_file_path, std::shared_ptr<HomingHelper> homing_helper_ptr,
+                  bool enable_dc = true);
 
-    EthercatHandler(
-        const std::string& config_file_path,
-        std::shared_ptr<HomingHelper> homing_helper_ptr,
-        bool enable_dc = true
-    );
+  ~EthercatHandler();
 
-    ~EthercatHandler();
-
-    bool m_EthercatLoopFlag = true;
-
-    const std::vector<std::pair<std::string, std::string>> getSlaveStatus() const;
-
-    inline void setLifterControlType(const ControlType& control_type)
+  void setClock()
+  {
+    if (m_EnableDC)
     {
-        m_LifterControlType = control_type;
+      clock_gettime(m_DcHelper.clock, &m_DcHelper.wakeupTime);
     }
-    inline const bool isEthercatOk() const
-    {
-        return m_EthercatOk;
-    }
-    void stopEcThread()
-    {
-        m_EthercatLoopFlag = false;
-    }
+  }
 
-    void setLimiterParams(
-        double max_vel,
-        double min_vel,
-        double max_acc,
-        double min_acc
-    )
-    {
+  bool m_EthercatLoopFlag = true;
 
-    }
+  const std::vector<std::pair<std::string, std::string>> getSlaveStatus() const;
 
-    void startTask() override
-    {
-        //this->setThreadParams(SCHED_FIFO, 99);
-        m_CyclicTaskThread = std::thread(
-            &EthercatHandler::cyclicTask,
-            this
-        );
-        this->updateThreadInfo();
-    }
+  inline void setLifterControlType(const ControlType& control_type)
+  {
+    m_LifterControlType = control_type;
+  }
+  inline const bool isEthercatOk() const
+  {
+    return m_EthercatOk;
+  }
+  void stopEcThread()
+  {
+    m_EthercatLoopFlag = false;
+  }
 
-    void setQuickStop(){
-        m_ActivateQuickStop = true;
-    }
+  void setLimiterParams(double max_vel, double min_vel, double max_acc, double min_acc)
+  {
+  }
 
-    void deactivateQuickStop()
-    {
-        m_ActivateQuickStop = false;
-    }
+  void startTask() override
+  {
+    // this->setThreadParams(SCHED_FIFO, 99);
+    m_CyclicTaskThread = std::thread(&EthercatHandler::cyclicTask, this);
+    this->updateThreadInfo();
+  }
 
-    const bool isQuickStopActive() const
-    {
-        return m_ActivateQuickStop;
-    }
-    
+  void setQuickStop()
+  {
+    m_ActivateQuickStop = true;
+  }
 
-    private:
+  void read();
 
-    ControlType m_LifterControlType;
+  void write();
 
-    std::chrono::time_point<std::chrono::steady_clock, std::chrono::milliseconds> m_PrevUpdateTimePoint;
+  void deactivateQuickStop()
+  {
+    m_ActivateQuickStop = false;
+  }
 
-    std::shared_ptr<HomingHelper> m_HomingHelperPtr;
+  const bool isQuickStopActive() const
+  {
+    return m_ActivateQuickStop;
+  }
 
-    bool m_EnableDC = true;
+private:
+  ControlType m_LifterControlType;
 
-    bool m_EthercatOk = false;
+  std::chrono::time_point<std::chrono::steady_clock, std::chrono::milliseconds> m_PrevUpdateTimePoint;
 
-    bool m_ActivateQuickStop = false;
+  std::shared_ptr<HomingHelper> m_HomingHelperPtr;
 
-    void cyclicTask() override;
+  bool m_EnableDC = true;
 
-    bool activateQuickStop();
+  bool m_EthercatOk = false;
+
+  bool m_ActivateQuickStop = false;
+
+  void cyclicTask() override;
+
+  bool activateQuickStop();
 };
 
-#endif // ETHERCAT_HANDLER_HPP_
+#endif  // ETHERCAT_HANDLER_HPP_

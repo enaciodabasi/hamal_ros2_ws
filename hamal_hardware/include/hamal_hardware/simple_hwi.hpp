@@ -50,9 +50,8 @@ struct Joint
 class HamalHardware;
 class EthercatHandler : public ethercat_interface::controller::Controller
 {
-
 public:
-friend class HamalHardware;
+  friend class HamalHardware;
   EthercatHandler(const std::string& config_file_path, bool enable_dc = true);
 
   ~EthercatHandler();
@@ -72,22 +71,24 @@ friend class HamalHardware;
   {
     // this->setThreadParams(SCHED_FIFO, 99);
     m_CyclicTaskThread = std::thread(&EthercatHandler::cyclicTask, this);
-    //this->updateThreadInfo();
-    
+    // this->updateThreadInfo();
   }
 
   void setClock()
   {
     if (m_EnableDC)
-  {
-    clock_gettime(m_DcHelper.clock, &m_DcHelper.wakeupTime);
-  }
+    {
+      clock_gettime(m_DcHelper.clock, &m_DcHelper.wakeupTime);
+    }
   }
 
 private:
   bool m_EnableDC = true;
 
   bool m_EthercatOk = false;
+
+  void read();
+  void write();
 
   void cyclicTask() override;
 };

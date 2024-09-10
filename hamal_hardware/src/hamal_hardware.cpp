@@ -137,7 +137,18 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_activate(co
     RCLCPP_INFO(rclcpp::get_logger("HamalHardware"), "Initialized EtherCAT interface.");
   }
   
-  m_EthercatController->startTask();
+  struct sched_param param;
+  param.sched_priority = 49;
+
+  pthread_t this_thread = pthread_self();
+  if (pthread_setschedparam(this_thread, SCHED_FIFO, &param))
+  {
+    std::cout << "Could not change thread priority;" << std::endl;
+    return hardware_interface::CallbackReturn::FAILURE;
+  }
+
+  // m_EthercatController->startTask();
+  m_EthercatController->setClock();
 
   m_HardwareInterfaceNodeExecutor.add_node(m_HardwareInterfaceNode);
   std::thread nodeSpinThread = std::thread(
@@ -161,19 +172,10 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_deactivate(
 }
 
 hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcpp::Time &time, const rclcpp::Duration &period)
-{
-
-  if((!((time - m_LastWriteTime) >= *m_WritePeriod)) && !m_InitialWrite)
-  {
-    return hardware_interface::return_type::OK;
-  }
-
-  if(m_InitialWrite){m_InitialWrite = false;}
-
-  m_LastWriteTime = time;
+{ 
   if (!m_EthercatController->isEthercatOk())
   {
-
+    m_EthercatController->write();
     m_EthercatController->setData<int32_t>("somanet_node_2", "target_velocity", 0);
     m_EthercatController->setData<int32_t>("somanet_node_1", "target_velocity", 0);
     return hardware_interface::return_type::OK;
@@ -184,9 +186,11 @@ hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcp
 
   m_EthercatController->setData<int32_t>("somanet_node_2", "target_velocity", (jointVelocityToMotorVelocity(leftWheelTargetVel)));
   m_EthercatController->setData<int32_t>("somanet_node_1", "target_velocity", (jointVelocityToMotorVelocity(rightWheelTargetVel)));
-
+  m_EthercatController->write();
   m_HardwareInfoArray->hardware_info_array.at(1).target_vel = (double)jointVelocityToMotorVelocity(rightWheelTargetVel);
   m_HardwareInfoArray->hardware_info_array.at(2).target_vel = (double)jointVelocityToMotorVelocity(leftWheelTargetVel);
+
+
 
   return hardware_interface::return_type::OK;
 }
@@ -194,13 +198,7 @@ hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcp
 hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp::Time &time, const rclcpp::Duration &period)
 {
 
-  if((!((time - m_LastReadTime) > *m_ReadPeriod)) && !m_InitialRead)
-  {
-    return hardware_interface::return_type::OK;
-  }
-
-  if(m_InitialRead){m_InitialRead = false;}
-
+  m_EthercatController->read();
   if (!m_EthercatController->isEthercatOk())
   {     
     return hardware_interface::return_type::OK;

@@ -27,19 +27,19 @@ foreach(depends IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${depends} REQUIRED)
 endforeach()
 
-#add_library(
-#  ${PROJECT_NAME}
-#  SHARED
-#  src/hamal_hardware.cpp
-#  src/ethercat_handler.cpp
-#  src/homing_helper.cpp
-#  src/hardware_interface_node.cpp
-#)
 add_library(
   ${PROJECT_NAME}
   SHARED
-  src/simple_hwi.cpp
+  src/hamal_hardware.cpp
+  src/ethercat_handler.cpp
+  src/homing_helper.cpp
+  src/hardware_interface_node.cpp
 )
+#add_library(
+#  ${PROJECT_NAME}
+#  SHARED
+#  src/simple_hwi.cpp
+#)
 target_include_directories(
   ${PROJECT_NAME}
   PUBLIC
