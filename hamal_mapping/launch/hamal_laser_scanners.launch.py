@@ -2,22 +2,26 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch.actions.include_launch_description import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 def generate_launch_description():
 
-    host_ip = DeclareLaunchArgument
+    #host_ip = DeclareLaunchArgument
     
     front_scanner = Node(
         package="sick_safetyscanners2",
         executable="sick_safetyscanners2_node",
-        name="sick_safetyscanners2_node",
+        name="sick_safetyscanners2_node_front",
         output="screen",
         emulate_tty=True,
         parameters=[
             {
-                "frame_id": "scan",
-                "sensor_ip": "192.168.1.101",
-                "host_ip": "192.168.1.194",
+                "frame_id": "front_scan_link",
+                "sensor_ip": "192.168.1.100",
+                "host_ip": "192.168.1.70",
                 "interface_ip": "0.0.0.0",
                 "host_udp_port": 0,
                 "channel": 0,
@@ -35,19 +39,22 @@ def generate_launch_description():
                 "min_intensities": 0.0,
             }
         ],
+        remappings=[
+            ('/scan', '/front_scan'),
+        ]
     )
 
     rear_scanner = Node(
         package="sick_safetyscanners2",
         executable="sick_safetyscanners2_node",
-        name="sick_safetyscanners2_node",
+        name="sick_safetyscanners2_node_rear",
         output="screen",
         emulate_tty=True,
         parameters=[
             {
-                "frame_id": "scan",
-                "sensor_ip": "192.168.1.100",
-                "host_ip": "192.168.1.194",
+                "frame_id": "rear_scan_link",
+                "sensor_ip": "192.168.1.101",
+                "host_ip": "192.168.1.70",
                 "interface_ip": "0.0.0.0",
                 "host_udp_port": 0,
                 "channel": 0,
@@ -65,13 +72,23 @@ def generate_launch_description():
                 "min_intensities": 0.0,
             }
         ],
+        remappings=[
+            ('/scan', '/rear_scan'),
+        ]
     )
-
-    ### TODO: Add laser scan merger
+    
+    merger_launch_path = os.path.join(get_package_share_directory("ros2_laser_scan_merger"), "launch", "merge_2_scan.launch.py")
+    
+    merger_launch = IncludeLaunchDescription(
+        launch_description_source=PythonLaunchDescriptionSource(
+            launch_file_path=[merger_launch_path]
+        ),
+        #launch_arguments={'robot_description', robot_description}
+    )
     
     ld = LaunchDescription()
     ld.add_action(front_scanner)
     ld.add_action(rear_scanner)
-    # ld.add_action(laser_scan_merger)
-     
+    ld.add_action(merger_launch)
+    
     return ld

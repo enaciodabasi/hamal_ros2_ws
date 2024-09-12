@@ -70,7 +70,11 @@ public:
   }
 
   const rclcpp::Time getCurrentTime();
-  
+  void publishInfo(hamal_custom_interfaces::msg::HardwareInformationArray arr)
+  {
+    RCLCPP_INFO(this->get_logger(), "Publishing hardware information");
+    this->m_HwInfoPub->publish(arr);
+  }
 
 private:
 

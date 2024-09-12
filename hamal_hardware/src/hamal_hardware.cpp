@@ -37,7 +37,7 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_init(const 
       true);
 
   m_HardwareInterfaceNode = std::make_shared<HardwareInterfaceNode>();
-  m_HardwareInfoArray = std::make_shared<hamal_custom_interfaces::msg::HardwareInformationArray>(hamal_custom_interfaces::msg::HardwareInformationArray());
+  m_HardwareInfoArray = std::make_shared<hamal_custom_interfaces::msg::HardwareInformationArray>(/* hamal_custom_interfaces::msg::HardwareInformationArray() */);
   
   m_HardwareInterfaceNode->init(m_HardwareInfoArray);
   m_HardwareInterfaceParams = m_HardwareInterfaceNode->getHardwareParams();
@@ -138,7 +138,7 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_activate(co
   }
   
   struct sched_param param;
-  param.sched_priority = 49;
+  param.sched_priority = 98;
 
   pthread_t this_thread = pthread_self();
   if (pthread_setschedparam(this_thread, SCHED_FIFO, &param))
@@ -150,17 +150,20 @@ hardware_interface::CallbackReturn hamal_hardware::HamalHardware::on_activate(co
   // m_EthercatController->startTask();
   m_EthercatController->setClock();
 
-  m_HardwareInterfaceNodeExecutor.add_node(m_HardwareInterfaceNode);
+ /*  m_HardwareInterfaceNodeExecutor.add_node(m_HardwareInterfaceNode);
   std::thread nodeSpinThread = std::thread(
     [](rclcpp::executors::SingleThreadedExecutor& exec){
+      
       while(rclcpp::ok())
       {
         exec.spin_once();
       }
+      
+      
     },
     std::ref(m_HardwareInterfaceNodeExecutor)
   );
-  nodeSpinThread.detach();
+  nodeSpinThread.detach(); */
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
@@ -178,6 +181,7 @@ hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcp
     m_EthercatController->write();
     m_EthercatController->setData<int32_t>("somanet_node_2", "target_velocity", 0);
     m_EthercatController->setData<int32_t>("somanet_node_1", "target_velocity", 0);
+    /* m_HardwareInterfaceNode->publishInfo((*m_HardwareInfoArray));  */
     return hardware_interface::return_type::OK;
   }
 
@@ -190,6 +194,7 @@ hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcp
   m_HardwareInfoArray->hardware_info_array.at(1).target_vel = (double)jointVelocityToMotorVelocity(rightWheelTargetVel);
   m_HardwareInfoArray->hardware_info_array.at(2).target_vel = (double)jointVelocityToMotorVelocity(leftWheelTargetVel);
 
+  m_HardwareInterfaceNode->publishInfo((*m_HardwareInfoArray));
 
 
   return hardware_interface::return_type::OK;
@@ -197,7 +202,7 @@ hardware_interface::return_type hamal_hardware::HamalHardware::write(const rclcp
 
 hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp::Time &time, const rclcpp::Duration &period)
 {
-
+  
   m_EthercatController->read();
   if (!m_EthercatController->isEthercatOk())
   {     
@@ -256,8 +261,6 @@ hardware_interface::return_type hamal_hardware::HamalHardware::read(const rclcpp
     m_HardwareInfoArray->hardware_info_array.at(2).current_vel = m_JointsMap.at(m_HardwareInterfaceParams->m_LeftWheelJointName).currentVelocity;
 
   }
-
-  m_SleepRate->sleep();
 
   return hardware_interface::return_type::OK;
 }

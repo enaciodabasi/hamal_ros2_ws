@@ -32,13 +32,27 @@ bool HardwareInterfaceNode::init(std::shared_ptr<hamal_custom_interfaces::msg::H
     rclcpp::SystemDefaultsQoS()
   );
   
-  m_HardwareInfoPublishTimer = this->create_wall_timer(
+  /* m_HardwareInfoPublishTimer = this->create_wall_timer(
     std::chrono::duration<double>(HARDWARE_INFO_PUBLISH_PERIOD), // Publish at 50 Hz.
     [this](){
-      const auto infoArray = *this->m_HardwareInfoArrayShPtr;
-      this->m_HwInfoPub->publish(infoArray);
+      if(!m_HardwareInfoArrayShPtr)
+      {
+        RCLCPP_INFO(this->get_logger(), "Hardware info array pointer is empty");
+      }
+      hamal_custom_interfaces::msg::HardwareInformationArray arr;
+      arr.hardware_info_array.resize(3); // 3 slaves
+      // Setup lifter information
+      arr.hardware_info_array.at(0).slave_name = "lifter_joint";
+      // Setup right wheel information
+      arr.hardware_info_array.at(1).slave_name = "right_wheel_joint";
+      // Setup left wheel information
+      arr.hardware_info_array.at(2).slave_name = "left_wheel_joint";
+      const auto infoArray = *(this->m_HardwareInfoArrayShPtr);
+      RCLCPP_INFO(this->get_logger(), "Publishing hardware information");
+      
+      this->m_HwInfoPub->publish(arr);
     }
-  );
+  ); */
 
   configure_params();
 }

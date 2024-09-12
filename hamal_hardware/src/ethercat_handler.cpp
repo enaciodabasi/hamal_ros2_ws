@@ -198,7 +198,11 @@ void EthercatHandler::read()
   m_Master->receive("domain_0");
 
   bool slavesEnabled = m_Master->enableSlaves();
+  m_Master->write<int8_t>("domain_0", "somanet_node_0", "op_mode", 0x09);
 
+  m_Master->write<int8_t>("domain_0", "somanet_node_1", "op_mode", 0x09);
+
+  m_Master->write<int8_t>("domain_0", "somanet_node_2", "op_mode", 0x09); 
   if (m_EthercatOk)
   {
     auto leftMotorStatusWord = m_Master->read<uint16_t>("domain_0", "somanet_node_2", "status_word");
@@ -259,11 +263,7 @@ void EthercatHandler::read()
 
 void EthercatHandler::write()
 {
-  m_Master->write<int8_t>("domain_0", "somanet_node_0", "op_mode", 0x09);
-
-  m_Master->write<int8_t>("domain_0", "somanet_node_1", "op_mode", 0x09);
-
-  m_Master->write<int8_t>("domain_0", "somanet_node_2", "op_mode", 0x09);
+  
 
   if (m_EthercatOk)
   {

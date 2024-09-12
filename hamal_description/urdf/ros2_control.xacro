@@ -3,7 +3,7 @@
 
   <xacro:macro name="hamal_ros2_control" params="name">
 
-    <ros2_control name="hamal_hardware" type="system">
+    <!-- <ros2_control name="hamal_hardware" type="system">
       
         <hardware>
           <plugin>hamal_hardware/HamalHardware</plugin>
@@ -23,6 +23,56 @@
         
         <state_interface name="position"/>
         <state_interface name="velocity"/>
+      </joint>
+    </ros2_control> -->
+
+    <ros2_control name="hamal_hardware" type="system">
+      <hardware>
+        <plugin>ethercat_driver/EthercatDriver</plugin>
+        <param name="master_id">0</param>
+        <param name="control_frequency">500</param>
+      </hardware>
+      <joint name="lifter_joint">
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+        <command_interface name="velocity"/>
+        <command_interface name="reset_fault"/>
+        <ec_module name="Maxon">
+          <plugin>ethercat_generic_plugins/EcCiA402Drive</plugin>
+          <param name="alias">0</param>
+          <param name="position">0</param>
+          <param name="mode_of_operation">9</param>
+          <param name="slave_config">$(find hamal_hardware)/config/icube_config.yaml</param>
+        </ec_module>
+      </joint>
+      <joint name="right_wheel_joint">
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+        <command_interface name="velocity"/>
+        <command_interface name="reset_fault"/>
+        <ec_module name="Maxon">
+          <plugin>ethercat_generic_plugins/EcCiA402Drive</plugin>
+          <param name="alias">0</param>
+          <param name="position">1</param>
+          <param name="mode_of_operation">9</param>
+          <param name="slave_config">$(find hamal_hardware)/config/icube_config.yaml</param>
+        </ec_module>
+      </joint>
+      <joint name="left_wheel_joint">
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+        <command_interface name="velocity"/>
+        <command_interface name="reset_fault"/>
+        <ec_module name="Maxon">
+          <plugin>ethercat_generic_plugins/EcCiA402Drive</plugin>
+          <param name="alias">0</param>
+          <param name="position">2</param>
+          <param name="mode_of_operation">9</param>
+          <param name="slave_config">$(find hamal_hardware)/config/icube_config.yaml</param>
+        </ec_module>
       </joint>
     </ros2_control>
 
