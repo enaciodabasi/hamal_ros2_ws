@@ -6,6 +6,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch.actions.include_launch_description import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 
 def generate_launch_description():
 
@@ -20,7 +21,7 @@ def generate_launch_description():
         parameters=[
             {
                 "frame_id": "front_scan_link",
-                "sensor_ip": "192.168.1.100",
+                "sensor_ip": "192.168.1.101",
                 "host_ip": "192.168.1.70",
                 "interface_ip": "0.0.0.0",
                 "host_udp_port": 0,
@@ -53,7 +54,7 @@ def generate_launch_description():
         parameters=[
             {
                 "frame_id": "rear_scan_link",
-                "sensor_ip": "192.168.1.101",
+                "sensor_ip": "192.168.1.100",
                 "host_ip": "192.168.1.70",
                 "interface_ip": "0.0.0.0",
                 "host_udp_port": 0,
@@ -77,13 +78,22 @@ def generate_launch_description():
         ]
     )
     
-    merger_launch_path = os.path.join(get_package_share_directory("ros2_laser_scan_merger"), "launch", "merge_2_scan.launch.py")
+    #merger_launch_path = os.path.join(get_package_share_directory("ira_laser_tools"), "launch", "laserscan_multi_merger.launch")
+    #
+    #merger_launch = IncludeLaunchDescription(
+    #    launch_description_source=PythonLaunchDescriptionSource(
+    #        launch_file_path=[merger_launch_path]
+    #    ),
+    #    #launch_arguments={'robot_description', robot_description}
+    #)
     
     merger_launch = IncludeLaunchDescription(
-        launch_description_source=PythonLaunchDescriptionSource(
-            launch_file_path=[merger_launch_path]
-        ),
-        #launch_arguments={'robot_description', robot_description}
+        XMLLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory("ira_laser_tools"),
+                "launch/laser_scan_multi_merger.launch",
+            )
+        )
     )
     
     ld = LaunchDescription()

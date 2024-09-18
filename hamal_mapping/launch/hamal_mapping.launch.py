@@ -26,7 +26,7 @@ def generate_launch_description():
 
     start_sync_slam_toolbox_node = LifecycleNode(
           parameters=[
-            get_package_share_directory("hamal_mapping") + '/config/sync_offline_mapping_config.yaml',
+            get_package_share_directory("hamal_mapping") + '/config/slam_toolbox_config.yaml',
             {'use_lifecycle_manager': use_lifecycle_manager}
           ],
           package='slam_toolbox',

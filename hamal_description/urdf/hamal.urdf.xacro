@@ -111,11 +111,18 @@
 
   <!-- Scanner -->
   <!-- Front Scanner -->
+
   <joint name="front_scan_joint" type="fixed">
     <parent link="base_link" />
     <child link="front_scan_link" />
-    <origin xyz="0.80612 0.3712 0.185" rpy="3.141592 0 0.7853981634" />
+    <origin xyz="0.91972 0.4838 0.0884" rpy="3.141592 0 0.7853981634" />
   </joint>
+
+<!--   <joint name="front_scan_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="front_scan_link" />
+    <origin xyz="0.80612 0.3712 0.185" rpy="3.141592 0 0.7853981634" />
+  </joint> -->
 
   <link name="front_scan_link">
     <visual>
@@ -137,8 +144,14 @@
   <joint name="rear_scan_joint" type="fixed">
     <parent link="base_link" />
     <child link="rear_scan_link" />
-    <origin xyz="-0.80612 -0.3712 0.185" rpy="3.141592 0  3.926990817 " />
+    <origin xyz="-0.91972 -0.4838 0.0884" rpy="3.141592 0  3.926990817 " />
   </joint>
+
+<!--   <joint name="rear_scan_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="rear_scan_link" />
+    <origin xyz="-0.80612 -0.3712 0.185" rpy="3.141592 0  3.926990817 " />
+  </joint> -->
 
   <link name="rear_scan_link">
     <visual>

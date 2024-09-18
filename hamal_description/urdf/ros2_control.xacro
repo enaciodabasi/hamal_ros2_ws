@@ -71,7 +71,7 @@
           <param name="alias">0</param>
           <param name="position">2</param>
           <param name="mode_of_operation">9</param>
-          <param name="slave_config">$(find hamal_hardware)/config/icube_config.yaml</param>
+          <param name="slave_config">$(find hamal_hardware)/config/left_motor_config.yaml</param>
         </ec_module>
       </joint>
     </ros2_control>
