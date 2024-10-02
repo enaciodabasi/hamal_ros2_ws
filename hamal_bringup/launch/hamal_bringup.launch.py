@@ -8,6 +8,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch.substitutions import Command, FindExecutable, PathJoinSubstitution, LaunchConfiguration
 from launch_ros.substitutions import FindPackageShare
+from launch.conditions import IfCondition
 
 from enum import Enum, auto
 import os
@@ -28,6 +29,12 @@ def generate_launch_description():
     robot_operation_mode_arg = DeclareLaunchArgument(
        name="operation_mode",
        default_value="AUTONOMOUS"
+    )
+    
+    use_slam = LaunchConfiguration("use_slam")
+    
+    declare_use_slam = DeclareLaunchArgument(
+      'use_slam', default_value='false' 
     )
 
     ### Get robot description
@@ -68,7 +75,22 @@ def generate_launch_description():
         launch_file_path=[scanner_launch_path]
       )
     )
-
+    
+    nav2_launch_path = os.path.join(get_package_share_directory("hamal_navigation"), "launch", "hamal_navigation.launch.py")
+    nav2_launch = IncludeLaunchDescription(
+      launch_description_source=PythonLaunchDescriptionSource(
+        launch_file_path=[nav2_launch_path]
+      )
+    )
+    
+    #mapping_launch_path = os.path.join(get_package_share_directory("hamal_mapping"), "launch", "hamal_mapping.launch")
+    #mapping_launch = IncludeLaunchDescription(
+    #    launch_description_source=PythonLaunchDescriptionSource(
+    #        launch_file_path=[control_launch_path]
+    #    ),
+    #    condition=IfCondition(use_slam)
+    #)
+    
     ### Get requested robot mode:
     ##robot_mode_str: str = LaunchConfiguration("operation_mode").perform()
     ##robot_mode_str = robot_mode_str.upper()
@@ -79,10 +101,14 @@ def generate_launch_description():
     ##else:
     ##  robot_mode = robot_mode_opt
     
+    
+    
     ld = LaunchDescription()
     ld.add_action(robot_state_pub_node)
     ld.add_action(control_launch)
     ld.add_action(laser_scanner_launch)
+    #ld.add_action(nav2_launch)
+    #ld.add_action(mapping_launch)
 
     #if robot_mode is RobotMode.AUTONOMOUS or robot_mode is RobotMode.HYBRID:
     #   ### Launch nav2

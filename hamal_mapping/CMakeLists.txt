@@ -13,7 +13,7 @@ find_package(ament_cmake REQUIRED)
 
 install(
   DIRECTORY
-  config launch
+  config launch ayosb_map yeni_harita
   DESTINATION share/${PROJECT_NAME}
 )
 

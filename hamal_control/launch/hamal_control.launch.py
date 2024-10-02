@@ -67,6 +67,9 @@ def generate_launch_description():
         package="controller_manager",
         executable="spawner",
         arguments=["hamal_base_controller", "--controller-manager", "/controller_manager"],
+        #remappings = [
+        #  ('/cmd_vel', '/hamal_base_controller/cmd_vel')
+        #]
     )
 
     delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(

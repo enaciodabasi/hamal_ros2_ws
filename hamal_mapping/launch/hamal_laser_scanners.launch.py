@@ -91,7 +91,7 @@ def generate_launch_description():
         XMLLaunchDescriptionSource(
             os.path.join(
                 get_package_share_directory("ira_laser_tools"),
-                "launch/laser_scan_multi_merger.launch",
+                "launch/laserscan_multi_merger.launch",
             )
         )
     )
